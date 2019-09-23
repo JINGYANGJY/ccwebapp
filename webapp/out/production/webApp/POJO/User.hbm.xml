@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="POJO">
+    <class table="user"  name="User" >
+        <!--id元素用于指定主键属性-->
+        <id name="id" type="java.lang.Long">
+            <column name="id" />
+            <!--该元素用于主键值生成策略native increment，sequence，native自增长策略-->
+            <generator class="increment" />
+        </id>
+        <property name="firstName" type="java.lang.String">
+            <column name="firstName" />
+        </property>
+        <property name="lastName" type="java.lang.String">
+            <column name="lastName" />
+        </property>
+        <property name="email" type="java.lang.String">
+            <column name="email" />
+        </property>
+        <property name="accountCreated" type="java.lang.String">
+            <column name="accountCreated" />
+        </property>
+        <property name="password" type="java.lang.String">
+            <column name="password" />
+        </property>
+
+    </class>
+</hibernate-mapping>

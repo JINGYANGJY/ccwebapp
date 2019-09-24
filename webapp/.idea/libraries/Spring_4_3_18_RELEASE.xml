@@ -20,6 +20,7 @@
       <root url="jar://$PROJECT_DIR$/lib/spring-context-4.3.18.RELEASE.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/spring-messaging-4.3.18.RELEASE.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/spring-core-4.3.18.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../json-20190722.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -25,7 +25,6 @@
       <Collation>latin1_swedish_ci</Collation>
     </schema>
     <schema id="7" parent="1" name="csye6225">
-      <Current>1</Current>
       <Visible>1</Visible>
       <Collation>latin1_swedish_ci</Collation>
     </schema>
@@ -1305,36 +1304,41 @@ blogID</ColNames>
     </foreign-key>
     <column id="318" parent="257" name="id">
       <Position>1</Position>
-      <DataType>bigint(20)|0s</DataType>
+      <DataType>varchar(200)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="319" parent="257" name="firstName">
+    <column id="319" parent="257" name="first_nam">
       <Position>2</Position>
       <DataType>varchar(255)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="320" parent="257" name="lastName">
+    <column id="320" parent="257" name="last_name">
       <Position>3</Position>
       <DataType>varchar(255)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="321" parent="257" name="email">
+    <column id="321" parent="257" name="email_address">
       <Position>4</Position>
       <DataType>varchar(255)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="322" parent="257" name="accountCreated">
+    <column id="322" parent="257" name="account_created">
       <Position>5</Position>
       <DataType>varchar(255)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="323" parent="257" name="password">
+    <column id="323" parent="257" name="account_updated">
       <Position>6</Position>
       <DataType>varchar(255)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="324" parent="257" name="PRIMARY">
+    <column id="324" parent="257" name="password">
+      <Position>7</Position>
+      <DataType>varchar(255)|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <key id="325" parent="257" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>

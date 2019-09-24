@@ -89,14 +89,14 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="database.console.LAST_STATE" value="false" />
     <property name="findjar.last.used.dir" value="$PROJECT_DIR$" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../IdeaProjects/Assignment2" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Downloads/webApp 2" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2091954" />
     <property name="settings.editor.selected.configurable" value="spring" />
@@ -127,6 +127,7 @@
   </component>
   <component name="RunManager">
     <configuration name="Tomcat 8.5.39 (Ubuntu)" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 8.5.39 (Ubuntu)" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
+      <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8088/webApp/" />
       <option name="START_JAVASCRIPT_DEBUGGER" value="true" />
       <option name="UPDATING_POLICY" value="restart-server" />
       <deployment>
@@ -139,7 +140,7 @@
       <server-settings>
         <option name="BASE_DIRECTORY_NAME" value="Unnamed_webApp" />
         <option name="HTTP_PORT" value="8088" />
-        <option name="JNDI_PORT" value="1088" />
+        <option name="JNDI_PORT" value="1087" />
       </server-settings>
       <predefined_log_file enabled="true" id="Tomcat" />
       <predefined_log_file enabled="true" id="Tomcat Catalina" />
@@ -235,7 +236,9 @@
       <workItem from="1569168855196" duration="5821000" />
       <workItem from="1569175279347" duration="5396000" />
       <workItem from="1569190101278" duration="27814000" />
-      <workItem from="1569283184955" duration="10621000" />
+      <workItem from="1569283184955" duration="13245000" />
+      <workItem from="1569354147339" duration="1325000" />
+      <workItem from="1569356555748" duration="4795000" />
     </task>
     <servers />
   </component>

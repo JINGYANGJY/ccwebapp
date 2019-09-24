@@ -12,37 +12,32 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 @Controller
 public class CreateUser {
     @Autowired
     UserDao userDao;
 
-    @RequestMapping(value="/v1/auth",method = RequestMethod.POST, consumes = "application/json")
-    public @ResponseBody ResponseEntity<String>
-    getAuth(@RequestBody ObjectNode objectNode){
-        String email = objectNode.get("email").asText();
-        String password = objectNode.get("password").asText();
-        String input = email + ':' + password;
-        String auth = Base64.getEncoder().encodeToString(input.getBytes());
-        JSONObject jObject = new JSONObject();
-        jObject.put("Authorization", "Basic " + auth);
-
-        return ResponseEntity.status(HttpStatus.OK).
-                body(jObject.toString());
-    }
-
-    @RequestMapping(value="/v1/use",method = RequestMethod.POST, consumes = "application/json")
+    //create a User
+    @RequestMapping(value="/v1/user",method = RequestMethod.POST, consumes = "application/json")
     public @ResponseBody ResponseEntity<String>
     createAccount(@RequestBody ObjectNode objectNode){
-        String firstName = objectNode.get("firstName").asText();
-        String lastName = objectNode.get("lastName").asText();
-        String email = objectNode.get("email").asText();
+        String firstName = objectNode.get("first_name").asText();
+        String lastName = objectNode.get("last_name").asText();
+        String email = objectNode.get("email_address").asText();
         String password = objectNode.get("password").asText();
+        String pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";//Strong password
+
+        boolean isMatch = Pattern.matches(pattern, password);
+
+        if(!isMatch) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Please use Strong Password");
+        }
+
         String pw_hash = BCrypt.hashpw(password, BCrypt.gensalt());
         User user = getUser(email);
         if(user == null){
@@ -50,12 +45,16 @@ public class CreateUser {
             SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
             user = new User(firstName, lastName, email, pw_hash);
             user.setAccountCreated(ft.format(dNow));
+            user.setAccountUpdate(ft.format(dNow));
+            user.setId(UUID.randomUUID().toString());
             userDao.register(user);
-
             JSONObject jObject = new JSONObject();
-            jObject.put("firstName", user.getFirstName());
-            jObject.put("lastName", user.getLastName());
-            jObject.put("email", user.getEmail());
+            jObject.put("id", user.getId());
+            jObject.put("first_name", user.getFirstName());
+            jObject.put("last_name", user.getLastName());
+            jObject.put("email_address", user.getEmail());
+            jObject.put("account_created", user.getAccountCreated());
+            jObject.put("account_updated", user.getAccountUpdate());
 
             return ResponseEntity.status(HttpStatus.OK).
                     body(jObject.toString());
@@ -66,15 +65,9 @@ public class CreateUser {
         }
     }
 
-
-    @GetMapping (value="/v1/getAll")
-    public @ResponseBody Iterable<User> getAllUsers(){
-        return  userDao.findAll();
-    }
-
-    @RequestMapping(value="/v1/getInfo",method = RequestMethod.POST, consumes = "application/json")
-    public @ResponseBody ResponseEntity<String>
-    getUserInfo(@RequestHeader(value="Authorization") String auth, @RequestBody ObjectNode objectNode){
+    //get User Information
+    @RequestMapping(value="/v1/user/self", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity<String> getUserInfo(@RequestHeader(value="Authorization") String auth){
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
@@ -82,11 +75,12 @@ public class CreateUser {
         if(Authentication(email, password)) {
             User user = userDao.getUserInfo(email);
             JSONObject jObject = new JSONObject();
-            jObject.put("firstName", user.getFirstName());
-            jObject.put("lastName", user.getLastName());
-            jObject.put("email", user.getEmail());
-            jObject.put("accountCreated", user.getAccountCreated());
-            jObject.put("accountUpdate", user.getAccountUpdate());
+            jObject.put("id", user.getId());
+            jObject.put("first_name", user.getFirstName());
+            jObject.put("last_name", user.getLastName());
+            jObject.put("email_address", user.getEmail());
+            jObject.put("account_created", user.getAccountCreated());
+            jObject.put("account_updated", user.getAccountUpdate());
 
             return ResponseEntity.status(HttpStatus.OK).
                     body(jObject.toString());
@@ -98,7 +92,8 @@ public class CreateUser {
         }
     }
 
-    @RequestMapping(value="/v1/update",method = RequestMethod.PUT, consumes = "application/json")
+    //update user information
+    @RequestMapping(value="/v1/user/self",method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody ResponseEntity<String>
     updateUserInfo(@RequestHeader(value="Authorization") String auth, @RequestBody ObjectNode objectNode){
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
@@ -110,26 +105,36 @@ public class CreateUser {
             Iterator<String> fieldNames = objectNode.fieldNames();
             while(fieldNames.hasNext()) {
                 String field = fieldNames.next();
-                if(!(field.equals("firstName") || field.equals("lastName") || field.equals("password"))) {
+                if(!(field.equals("first_name") || field.equals("last_name") || field.equals("password"))) {
                     return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
                             .body(" Only first name, last name and password can be updated");
                 }
             }
             User user = userDao.getUserInfo(email);
-            String newFirstName = objectNode.get("firstName") == null || objectNode.get("firstName").asText() == "" ? user.getFirstName() : objectNode.get("firstName").asText();
-            String newLastName = objectNode.get("lastName") == null || objectNode.get("lastName").asText() == "" ? user.getLastName() : objectNode.get("lastName").asText();
-            String newPassword = objectNode.get("password") == null || objectNode.get("password").asText() == "" ? user.getPassword() : BCrypt.hashpw(objectNode.get("password").asText(), BCrypt.gensalt());
-            userDao.updateUser(user, newFirstName, newLastName, newPassword);
-            JSONObject jObject = new JSONObject();
-            jObject.put("firstName", user.getFirstName());
-            jObject.put("lastName", user.getLastName());
-            jObject.put("email", user.getEmail());
-            jObject.put("accountCreated", user.getAccountCreated());
-            jObject.put("accountUpdate", user.getAccountUpdate());
+            String newFirstName = objectNode.get("first_name") == null || objectNode.get("first_name").asText() == "" ? user.getFirstName() : objectNode.get("first_name").asText();
+            String newLastName = objectNode.get("last_name") == null || objectNode.get("last_name").asText() == "" ? user.getLastName() : objectNode.get("last_name").asText();
+            String newPassword;
 
-            return ResponseEntity.status(HttpStatus.OK).
-                    body(jObject.toString());
+            if(objectNode.get("password") == null || objectNode.get("password").asText() == "") {
+                newPassword = user.getPassword();
+            } else {
+                newPassword = objectNode.get("password").asText();
+                String pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";//Strong password
+
+                boolean isMatch = Pattern.matches(pattern, newPassword);
+
+                if(!isMatch) {
+                    return ResponseEntity
+                            .status(HttpStatus.BAD_REQUEST)
+                            .body("Please use Strong Password");
+                }
+                newPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+            }
+            userDao.updateUser(user, newFirstName, newLastName, newPassword);
+
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).
+                    body("");
         }
         else {
             return ResponseEntity
@@ -155,12 +160,6 @@ public class CreateUser {
         } else{
             return false;
         }
-
-    }
-
-    //use regex to check if password is strong or not
-    private boolean isStrong(String password){
-        return password.matches("^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z])");
     }
 
 }

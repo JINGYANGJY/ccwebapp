@@ -6,16 +6,10 @@
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
     <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/csye6225</property>
     <property name="hibernate.connection.password">mynewpassword</property>
-   <property name="hibernate.connection.username">root</property>
-
-
-    <!--create：如果没有该表则创建，如果有表就就删除后再创建-->
-    <!--update：如果有有表映射文件没有添加新的记录就不用再创建了-->
+    <property name="hibernate.connection.username">root</property>
     <property name="hibernate.hbm2ddl.auto">update</property>
     <property name="hibernate.show_sql">true</property>
-      <mapping class="DAO.UserDao"></mapping>
-<!--    <mapping resource="/POJO/Register.hbm.xml"/>-->
-      <mapping resource="/POJO/User.hbm.xml"/>
-    <!--<mapping resource="com/Pojo/BooksEntity.hbm.xml"/>-->
+    <mapping class="DAO.UserDao"></mapping>
+    <mapping resource="/POJO/User.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

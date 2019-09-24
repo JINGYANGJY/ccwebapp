@@ -28,11 +28,19 @@ public class CreateUser {
         String lastName = objectNode.get("last_name").asText();
         String email = objectNode.get("email_address").asText();
         String password = objectNode.get("password").asText();
-        String pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";//Strong password
+        String passwordPattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";//Strong password
+        boolean isPassMatch = Pattern.matches(passwordPattern, password);
 
-        boolean isMatch = Pattern.matches(pattern, password);
+        String emailPattern = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+(?:\\.[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+)*@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";
+        boolean isEmailMatch = Pattern.matches(emailPattern, email);
 
-        if(!isMatch) {
+        if(!isEmailMatch) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Please use correct email");
+        }
+
+        if(!isPassMatch) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Please use Strong Password");

@@ -20,6 +20,9 @@
         <property name="accountCreated" type="java.lang.String">
             <column name="accountCreated" />
         </property>
+        <property name="accountUpdate" type="java.lang.String">
+            <column name="accountUpdate" />
+        </property>
         <property name="password" type="java.lang.String">
             <column name="password" />
         </property>

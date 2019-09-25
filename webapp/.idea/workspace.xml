@@ -7,16 +7,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82fcb311-0c4b-4cbd-b464-c8ee40942b9c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/lib.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Test/CreateUserTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Spring_4_3_18_RELEASE.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Spring_4_3_18_RELEASE.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/ccwebapp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/ccwebapp.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/CreateUser.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/CreateUser.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/Controller/CreateUser.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/Controller/CreateUser.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/DAO/UserDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/DAO/UserDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/CreateUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/CreateUser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DAO/UserDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/UserDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Test/CreateUserTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Test/CreateUserTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/webapp/Test/CreateUserTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/Test/CreateUserTest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/webapp.iml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -157,7 +151,7 @@
       </method>
     </configuration>
     <configuration name="Tomcat 8.5.39 (Ubuntu)" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 8.5.39 (Ubuntu)" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
-      <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8088/webApp/" />
+      <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8086/webApp/" />
       <option name="START_JAVASCRIPT_DEBUGGER" value="true" />
       <option name="UPDATING_POLICY" value="restart-server" />
       <deployment>
@@ -169,8 +163,8 @@
       </deployment>
       <server-settings>
         <option name="BASE_DIRECTORY_NAME" value="Unnamed_webApp" />
-        <option name="HTTP_PORT" value="8088" />
-        <option name="JNDI_PORT" value="1087" />
+        <option name="HTTP_PORT" value="8086" />
+        <option name="JNDI_PORT" value="1086" />
       </server-settings>
       <predefined_log_file enabled="true" id="Tomcat" />
       <predefined_log_file enabled="true" id="Tomcat Catalina" />
@@ -232,6 +226,10 @@
         </option>
       </method>
     </configuration>
+    <list>
+      <item itemvalue="JUnit.CreateUserTest" />
+      <item itemvalue="Tomcat Server.Tomcat 8.5.39 (Ubuntu)" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.CreateUserTest" />
@@ -276,6 +274,7 @@
       <workItem from="1569356555748" duration="4795000" />
       <workItem from="1569362381850" duration="5070000" />
       <workItem from="1569436406429" duration="1475000" />
+      <workItem from="1569440486477" duration="1288000" />
     </task>
     <servers />
   </component>

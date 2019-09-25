@@ -8,8 +8,6 @@
   <component name="ChangeListManager">
     <list default="true" id="82fcb311-0c4b-4cbd-b464-c8ee40942b9c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/DAO/UserDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/DAO/UserDao.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Test/CreateUserTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test/CreateUserTest.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -274,7 +272,7 @@
       <workItem from="1569436406429" duration="1475000" />
       <workItem from="1569440486477" duration="1288000" />
       <workItem from="1569446124175" duration="269000" />
-      <workItem from="1569549267220" duration="232000" />
+      <workItem from="1569549267220" duration="882000" />
     </task>
     <servers />
   </component>

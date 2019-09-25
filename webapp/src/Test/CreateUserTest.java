@@ -11,7 +11,12 @@ public class CreateUserTest {
     String password;
     String nonStrongpassword;
 
-
+    @Before
+    public  void initial(){
+        createUser = new CreateUser();
+        password ="Yang!123";
+        nonStrongpassword="123";
+    }
 
 
     @Test

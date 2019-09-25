@@ -159,4 +159,20 @@ public class CreateUser {
         }
     }
 
+    public boolean checkPassword(String password, String stored_hash){
+        if (BCrypt.checkpw(password, stored_hash)) {
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    public boolean strongPasswordCheck(String password){
+        String pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";//Strong password
+        boolean isMatch = Pattern.matches(pattern, password);
+        if(!isMatch) {
+            return false;
+        }
+        return true;
+    }
 }

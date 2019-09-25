@@ -16,7 +16,7 @@
 
 
 ## Build and Deploy Instructions
-* Open the Github link: 
+* Open the Github link: https://github.com/JINGYANGJY/ccwebapp
 * Open Intellij
 * Run the project on Tomcat server in Intellij
 * Open Postman Client, import from link: https://www.getpostman.com/collections/8078e9f19f71adbf0f2f to load postman collections

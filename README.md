@@ -2,23 +2,27 @@
 
 ## Team Information
 
-| Name | NEU ID | Email Address |
-| Shujie Fan | 001838430 | fan.shuj@northeastern.edu |
-| Yiqiang Wang | 001403835 | wang.yiqi@northeastern.edu |
-| Jing Yang | 001886075 | yang.jing4@northeastern.edu |
+ Name | NEU ID | Email Address 
+ -----|--------|--------------
+ Shujie Fan   | 001838430 | fan.shuj@northeastern.edu 
+ Yiqiang Wang | 001403835 | wang.yiqi@northeastern.edu 
+ Jing Yang    | 001886075 | yang.jing4@northeastern.edu 
 
 ## Technology Stack
+* Intellij
+* Tomcat Server
+* Mysql Workbench
+* Postman Client
 
 
-## Build Instructions
-
-
-## Deploy Instructions
+## Build and Deploy Instructions
+* Open the Github link: https://github.com/JINGYANGJY/ccwebapp
+* Open Intellij
+* Run the project on Tomcat server in Intellij
+* Open Postman Client, import from link: https://www.getpostman.com/collections/8078e9f19f71adbf0f2f to load postman collections
 
 
 ## Running Tests
-
-
-## CI/CD
+Run the CreateUserTest Junit file under Test folder.
 
 

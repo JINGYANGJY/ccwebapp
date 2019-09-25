@@ -60,7 +60,7 @@ public class UserDao extends Dao {
             user.setLastName(lastName);
             user.setPassword(password);
             Date dNow = new Date( );
-            SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+            SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
             user.setAccountUpdate(ft.format(dNow));
             getSession().update(user);
             commit();

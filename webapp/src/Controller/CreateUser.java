@@ -24,6 +24,11 @@ public class CreateUser {
     @RequestMapping(value="/v1/user",method = RequestMethod.POST, consumes = "application/json")
     public @ResponseBody ResponseEntity<String>
     createAccount(@RequestBody ObjectNode objectNode){
+        if(objectNode.get("first_name")==null||objectNode.get("last_name")==null||
+                objectNode.get("email_address")==null||objectNode.get("password")==null)
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("Required info Cannot be null");
         String firstName = objectNode.get("first_name").asText();
         String lastName = objectNode.get("last_name").asText();
         String email = objectNode.get("email_address").asText();
@@ -47,10 +52,10 @@ public class CreateUser {
         }
 
         String pw_hash = BCrypt.hashpw(password, BCrypt.gensalt());
-        User user = getUser(email);
+        User user = userDao.getUserInfo(email);
         if(user == null){
             Date dNow = new Date( );
-            SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+            SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
             user = new User(firstName, lastName, email, pw_hash);
             user.setAccountCreated(ft.format(dNow));
             user.setAccountUpdate(ft.format(dNow));
@@ -147,22 +152,13 @@ public class CreateUser {
         else {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Unable to get any other user info");
+                    .body("Unable to update any other user info");
         }
-    }
-
-    public User getUser(String email){
-        List<User> list = userDao.findAll();
-        for(User u : list){
-            if(u.getEmail().equalsIgnoreCase(email)){
-                return u;
-            }
-        }
-        return null;
     }
 
     public boolean Authentication(String userName, String password) {
-        String stored_hash = getUser(userName).getPassword();
+        if(userDao.getUserInfo(userName)==null) return false;
+        String stored_hash = userDao.getUserInfo(userName).getPassword();
         if (BCrypt.checkpw(password, stored_hash)) {
             return true;
         } else{
@@ -170,4 +166,20 @@ public class CreateUser {
         }
     }
 
+    public boolean checkPassword(String password, String stored_hash){
+        if (BCrypt.checkpw(password, stored_hash)) {
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    public boolean strongPasswordCheck(String password){
+        String pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";//Strong password
+        boolean isMatch = Pattern.matches(pattern, password);
+        if(!isMatch) {
+            return false;
+        }
+        return true;
+    }
 }

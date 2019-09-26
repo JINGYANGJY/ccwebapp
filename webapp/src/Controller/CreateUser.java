@@ -24,6 +24,11 @@ public class CreateUser {
     @RequestMapping(value="/v1/user",method = RequestMethod.POST, consumes = "application/json")
     public @ResponseBody ResponseEntity<String>
     createAccount(@RequestBody ObjectNode objectNode){
+        if(objectNode.get("first_name")==null||objectNode.get("last_name")==null||
+                objectNode.get("email_address")==null||objectNode.get("password")==null)
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("Required info Cannot be null");
         String firstName = objectNode.get("first_name").asText();
         String lastName = objectNode.get("last_name").asText();
         String email = objectNode.get("email_address").asText();

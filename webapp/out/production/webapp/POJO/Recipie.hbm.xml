@@ -3,7 +3,7 @@
 <hibernate-mapping package="POJO">
     <class table="recipie"  name="Recipie" >
         <id name="id" type="java.lang.String">
-            <column name="id" length="100" />
+            <column name="id" length="200" />
         </id>
         <property name="createdTs" type="java.lang.String">
             <column name="created_ts" />
@@ -32,9 +32,8 @@
         <property name="servings" type="java.lang.Integer">
             <column name="servings" />
         </property>
-
-        <list name="ingredients" table="ingredients_table" inverse="false" lazy="true">
-            <key column="rid"></key>
+        <list name="ingredients" table="ingredients" inverse="false" lazy="true">
+            <key column="id"></key>
             <index column="type"></index>
             <element column="ingredient" type="java.lang.String" />
         </list>

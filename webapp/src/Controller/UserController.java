@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @Controller
-public class CreateUser {
+public class UserController {
     @Autowired
     UserDao userDao;
 

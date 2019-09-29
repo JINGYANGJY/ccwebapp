@@ -11,5 +11,8 @@
     <property name="hibernate.show_sql">true</property>
     <mapping class="DAO.UserDao"></mapping>
     <mapping resource="/POJO/User.hbm.xml"/>
+    <mapping resource="/POJO/NutritionInformation.hbm.xml"/>
+    <mapping resource="/POJO/OrderedList.hbm.xml"/>
+    <mapping resource="/POJO/Recipie.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

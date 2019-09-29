@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="POJO">
+    <class table="recipie"  name="Recipie" >
+        <id name="id" type="java.lang.String">
+            <column name="id" length="100" />
+        </id>
+        <property name="createdTs" type="java.lang.String">
+            <column name="created_ts" />
+        </property>
+        <property name="updatedTs" type="java.lang.String">
+            <column name="updated_ts" />
+        </property>
+        <property name="authorId" type="java.lang.String">
+            <column name="author_id" length="200" />
+        </property>
+        <property name="cookTimeInMin" type="java.lang.Integer">
+            <column name="cook_time_in_min" />
+        </property>
+        <property name="prepTimeInMin" type="java.lang.Integer">
+            <column name="prep_time_in_min" />
+        </property>
+        <property name="totalTimeInMin" type="java.lang.Integer">
+            <column name="total_time_in_min" />
+        </property>
+        <property name="title" type="java.lang.String">
+            <column name="title" />
+        </property>
+        <property name="cusine" type="java.lang.String">
+            <column name="cusine" />
+        </property>
+        <property name="servings" type="java.lang.Integer">
+            <column name="servings" />
+        </property>
+
+        <!--        TODO-->
+        <list name="ingredients" table="ingredients_table" inverse="false" lazy="true">
+            <key column="rid"></key>
+            <index column="type"></index>
+            <element column="ingredient" type="java.lang.String" />
+        </list>
+        <list name="steps" table="orderedList" cascade="all">
+            <key column="id"></key>
+            <index column="position"></index>
+            <one-to-many class="OrderedList" />
+        </list>
+        <one-to-one name="nutritionInformation" class="NutritionInformation" constrained="true" />
+    </class>
+</hibernate-mapping>

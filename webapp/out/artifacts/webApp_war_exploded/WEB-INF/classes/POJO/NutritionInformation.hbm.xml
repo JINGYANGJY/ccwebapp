@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="POJO">
+    <class table="nutritionInformation"  name="NutritionInformation" >
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="increment" />
+        </id>
+        <property name="calories" type="java.lang.Integer">
+            <column name="calories" />
+        </property>
+        <property name="cholesterolInMg" type="java.lang.Double">
+            <column name="cholesterol_in_mg" />
+        </property>
+        <property name="sodiumInMg" type="java.lang.Integer">
+            <column name="sodium_in_mg" />
+        </property>
+        <property name="carbohydratesInGrams" type="java.lang.Double">
+            <column name="carbohydrates_in_grams" />
+        </property>
+        <property name="proteinInGrams" type="java.lang.Double">
+            <column name="protein_in_grams" />
+        </property>
+    </class>
+</hibernate-mapping>

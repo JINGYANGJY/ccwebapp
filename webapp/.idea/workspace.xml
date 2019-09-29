@@ -7,30 +7,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82fcb311-0c4b-4cbd-b464-c8ee40942b9c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Controller/RecipieController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/POJO/NutritionInformation.hbm.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/POJO/NutritionInformation.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/POJO/OrderedList.hbm.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/POJO/OrderedList.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/POJO/Recipie.hbm.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/POJO/Recipie.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DAO/RecipieDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/CreateUser.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/CreateUser.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/Dao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/Dao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Test/CreateUserTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Test/CreateUserTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/Recipie.hbm.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/Recipie.hbm.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/hibernate.cfg.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/Controller/CreateUser.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/Controller/CreateUser.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/DAO/Dao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/DAO/Dao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/DAO/UserDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/DAO/UserDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/POJO/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/Test/CreateUserTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/Test/CreateUserTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/Recipie.hbm.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/POJO/Recipie.hbm.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/webapp/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/webapp/hibernate.cfg.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/CreateUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/CreateUser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Test/CreateUserTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test/CreateUserTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/hibernate.cfg.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/CreateUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/POJO/Recipie.hbm.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/POJO/Recipie.hbm.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Test/CreateUserTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test/UserControllerTest.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -154,7 +139,7 @@
     </option>
   </component>
   <component name="RunManager" selected="Tomcat Server.Tomcat 8.5.39 (Ubuntu)">
-    <configuration name="CreateUserTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="UserControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="webapp" />
       <extension name="coverage">
         <pattern>
@@ -163,7 +148,7 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="Test" />
-      <option name="MAIN_CLASS_NAME" value="Test.CreateUserTest" />
+      <option name="MAIN_CLASS_NAME" value="Test.UserControllerTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -246,12 +231,12 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="JUnit.CreateUserTest" />
+      <item itemvalue="JUnit.UserControllerTest" />
       <item itemvalue="Tomcat Server.Tomcat 8.5.39 (Ubuntu)" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.CreateUserTest" />
+        <item itemvalue="JUnit.UserControllerTest" />
       </list>
     </recent_temporary>
   </component>
@@ -296,7 +281,7 @@
       <workItem from="1569440486477" duration="1288000" />
       <workItem from="1569446124175" duration="269000" />
       <workItem from="1569549267220" duration="882000" />
-      <workItem from="1569705552955" duration="9816000" />
+      <workItem from="1569705552955" duration="14915000" />
     </task>
     <servers />
   </component>

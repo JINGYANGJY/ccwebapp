@@ -12,6 +12,20 @@ import java.util.List;
 
 public class RecipieDao extends Dao {
 
+    public Recipie save(Recipie recipie)  {
+        try {
+            super.begin();
+
+            getSession().save(recipie);
+            super.commit();
+        } catch (Exception e) {
+            super.rollback();
+        } finally {
+            super.close();
+        }
+        return recipie;
+    }
+
 //    public Recipie getRecipieInfo(int id) {
 //        try {
 //            begin();

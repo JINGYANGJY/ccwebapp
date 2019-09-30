@@ -6,66 +6,7 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82fcb311-0c4b-4cbd-b464-c8ee40942b9c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/DAO/OrderedListDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/artifacts/webApp_war_exploded.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/artifacts/webApp_war_exploded.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5262218e-aec8-4882-aea7-1ed895f15d95.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/5262218e-aec8-4882-aea7-1ed895f15d95.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/applicationContext.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/applicationContext.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/RecipieController.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/RecipieController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Controller/UserController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/Dao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/Dao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/RecipieDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/RecipieDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/DAO/UserDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/NutritionInformation.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/NutritionInformation.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/NutritionInformation.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/OrderedList.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/OrderedList.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/OrderedList.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/Recipie.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/Recipie.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/Recipie.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/POJO/User.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Test/UserControllerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/Test/UserControllerTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/classes/hibernate.cfg.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/dispatcher-servlet.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/dispatcher-servlet.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/webApp_war_exploded/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webApp/POJO/User.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webApp/hibernate.cfg.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/Controller/RecipieController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/Controller/UserController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/DAO/Dao.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/DAO/RecipieDao.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/DAO/UserDao.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/META-INF/webapp.kotlin_module" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/NutritionInformation.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/NutritionInformation.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/OrderedList.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/OrderedList.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/Recipie.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/Recipie.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/POJO/User.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/webapp/Test/UserControllerTest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/RecipieController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/RecipieController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DAO/RecipieDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/RecipieDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DAO/UserDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/UserDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/NutritionInformation.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/NutritionInformation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/POJO/NutritionInformation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/OrderedList.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/OrderedList.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/POJO/OrderedList.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/Recipie.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/Recipie.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/POJO/Recipie.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/User.hbm.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/POJO/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/POJO/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/hibernate.cfg.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/WEB-INF/applicationContext.xml" beforeDir="false" afterPath="$PROJECT_DIR$/web/WEB-INF/applicationContext.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/WEB-INF/dispatcher-servlet.xml" beforeDir="false" afterPath="$PROJECT_DIR$/web/WEB-INF/dispatcher-servlet.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/web/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/webapp.iml" afterDir="false" />
-    </list>
+    <list default="true" id="82fcb311-0c4b-4cbd-b464-c8ee40942b9c" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -587,11 +528,10 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="14447000" />
+    <option name="totallyTimeSpent" value="14853000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Persistence" sideWeight="0.50089765" side_tool="true" weight="0.24964234" />
       <window_info id="Designer" />

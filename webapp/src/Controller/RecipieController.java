@@ -101,9 +101,7 @@ UserDao userDao;
             orderedList.setPosition(jsonNode.get("position").asInt());
             orderedList.setItems(jsonNode.get("items").asText());
             orderedList.setRecipie(recipie);
-            orderedListDao.save(orderedList);
             orderedLists.add(orderedList);
-
         }
         recipie.setSteps(orderedLists);
 
@@ -115,9 +113,18 @@ UserDao userDao;
         nutritionInformation.setSodiumInMg(nutritionInformationObjectNode.get("sodium_in_mg").asInt());
         nutritionInformation.setCarbohydratesInGrams(nutritionInformationObjectNode.get("carbohydrates_in_grams").asDouble());
         nutritionInformation.setProteinInGrams(nutritionInformationObjectNode.get("protein_in_grams").asDouble());
-
-        nutritionInformationDao.save(nutritionInformation);
         recipie.setNutritionInformation(nutritionInformation);
+
+        recipieDao.save(recipie);
+
+        for(OrderedList ol:orderedLists){
+            ol.setRecipie(recipie);
+            orderedListDao.save(ol);
+        }
+
+        nutritionInformation.setRecipie(recipie);
+        nutritionInformationDao.save(nutritionInformation);
+//        recipie.setNutritionInformation(nutritionInformation);
 
 //        recipie.setId(UUID.randomUUID().toString());
 

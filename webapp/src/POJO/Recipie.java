@@ -1,21 +1,60 @@
 package POJO;
 
+import java.util.ArrayList;
 import java.util.List;
 
+
+
+import org.springframework.stereotype.Component;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name="recipie")
+@PrimaryKeyJoinColumn(name = "id")
 public class Recipie {
+
+
+    @Id
+    @GeneratedValue
+    @Column(name="id",unique = true,nullable =false)
     private String id;
+    @Column (name = "created_ts")
     private String createdTs;
+    @Column (name = "updated_ts")
     private String updatedTs;
+
+    @Column (name = "author_id")
     private String authorId;
+
+    @Column (name = "cook_time_in_min")
     private int cookTimeInMin;
+    @Column (name ="prep_time_in_min")
     private int prepTimeInMin;
+    @Column (name ="total_time_in_min")
     private int totalTimeInMin;
+    @Column (name ="title")
     private String title;
+    @Column (name = "cusine")
     private String cusine;
+    @Column (name = "servings")
     private int servings;
-    private List<String> ingredients;
-    private List<OrderedList> steps;
+
+    @ElementCollection
+    @CollectionTable(name="ingredients", joinColumns=@JoinColumn(name="id"))
+    @Column(name="ingredient")
+    private List<String> ingredients = new ArrayList<>();
+
+    @OneToMany(mappedBy = "recipie")
+    private List<OrderedList> steps = new ArrayList<>();
+
+    @OneToOne(mappedBy = "recipie",cascade=CascadeType.ALL, optional = false,fetch = FetchType.LAZY)
     private NutritionInformation nutritionInformation;
+
+
+
+    public Recipie() {
+    }
 
     public String getId() {
         return id;

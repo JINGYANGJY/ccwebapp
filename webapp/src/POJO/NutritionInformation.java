@@ -1,12 +1,33 @@
 package POJO;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import javax.persistence.*;
+
+@Entity
+
+@Table( name ="nutritionInformation")
 public class NutritionInformation {
+
+    @Id
+    @GenericGenerator(name = "generator", strategy = "foreign",
+            parameters = @Parameter(name = "property", value = "recipie"))
+    @Column(name ="id", unique = true, nullable = false)
     private int id;
+    @Column(name="calories")
     private int calories;
+    @Column(name="cholesterol_in_mg")
     private double cholesterolInMg;
+    @Column(name ="sodium_in_mg")
     private int sodiumInMg;
+    @Column(name="carbohydrates_in_grams")
     private double carbohydratesInGrams;
+    @Column(name ="protein_in_grams")
     private double proteinInGrams;
+
+    @OneToOne
+    @PrimaryKeyJoinColumn
+    private  Recipie recipie;
 
     public int getCalories() {
         return calories;

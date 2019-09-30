@@ -73,6 +73,14 @@ public class NutritionInformation {
         return id;
     }
 
+    public Recipie getRecipie() {
+        return recipie;
+    }
+
+    public void setRecipie(Recipie recipie) {
+        this.recipie = recipie;
+    }
+
     public void setId(int id) {
         this.id = id;
     }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
@@ -16,8 +16,9 @@ public class Recipie {
 
 
     @Id
-    @GeneratedValue
-    @Column(name="id",unique = true,nullable =false)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name="uuid",strategy = "uuid2")
+    @Column(name="id",nullable =false)
     private String id;
     @Column (name = "created_ts")
     private String createdTs;

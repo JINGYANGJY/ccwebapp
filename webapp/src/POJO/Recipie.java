@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name="recipie")
-@PrimaryKeyJoinColumn(name = "id")
 public class Recipie {
 
 
     @Id
-    @GeneratedValue
-    @Column(name="id",unique = true,nullable =false)
+    @GeneratedValue(generator = "generator")
+    @GenericGenerator(name="generator",strategy = "uuid2")
+    @Column(name="id")
     private String id;
     @Column (name = "created_ts")
     private String createdTs;
@@ -48,7 +48,7 @@ public class Recipie {
     @OneToMany(mappedBy = "recipie")
     private List<OrderedList> steps = new ArrayList<>();
 
-    @OneToOne(mappedBy = "recipie",cascade=CascadeType.ALL, optional = false,fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "recipie")
     private NutritionInformation nutritionInformation;
 
 

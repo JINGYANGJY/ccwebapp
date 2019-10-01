@@ -12,8 +12,8 @@ public class NutritionInformation {
     @Id
     @GenericGenerator(name = "generator", strategy = "foreign",
             parameters = @Parameter(name = "property", value = "recipie"))
-    @Column(name ="id", unique = true, nullable = false)
-    private int id;
+    @Column(name ="id")
+    private String id;
     @Column(name="calories")
     private int calories;
     @Column(name="cholesterol_in_mg")
@@ -69,11 +69,19 @@ public class NutritionInformation {
         this.proteinInGrams = proteinInGrams;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public Recipie getRecipie() {
+        return recipie;
+    }
+
+    public void setRecipie(Recipie recipie) {
+        this.recipie = recipie;
+    }
+
+    public void setId(String id) {
         this.id = id;
     }
 }

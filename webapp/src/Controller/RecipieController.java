@@ -31,53 +31,105 @@ public class RecipieController {
     //  in [1,5] range.
 
 
-//    @RequestMapping(value="/v1/recipie/{id}",method = RequestMethod.PUT, consumes = "application/json")
-//    public @ResponseBody
-//    ResponseEntity<String>
-//    createAccount(@RequestHeader(value="Authorization") String auth, @RequestBody ObjectNode objectNode){
-//
-//        byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
-//        String decodedString = new String(decodedBytes);
-//        String email = decodedString.split(":")[0];
-//        String password = decodedString.split(":")[1];
-//
-//
-//        int cook_time_in_min = objectNode.get("cook_time_in_min").asInt();
-//        int prep_time_in_min = objectNode.get("prep_time_in_min").asInt();
-//        String title = objectNode.get("title").asText();
-//        String cusine = objectNode.get("cusine").asText();
-//        int servings = objectNode.get("servings").asInt();
-//        JsonNode ingredients= objectNode.get("ingredients");
-//        List<String>  ingredientsArray = new ArrayList<>();
-//        while(ingredients.iterator().hasNext()){
-//            ingredientsArray.add(ingredients.iterator().next().asText());
-//        }
-//        ArrayNode orderedLists = (ArrayNode) objectNode.get("steps");
-//        for(JsonNode orderedList_JsonNode: orderedLists){
-//            OrderedList orderedList = new OrderedList();
-//            orderedList.setPosition(orderedList_JsonNode.get("position").asInt());
-//            orderedList.setItems(orderedList_JsonNode.get("items").asText());
-//        }
-//        JsonNode nutrition_information= objectNode.get("nutrition_information");
-//        NutritionInformation nuInfo = new NutritionInformation();
-//        nuInfo.setCalories(nutrition_information.get("calories").asInt());
-//        nuInfo.setCarbohydratesInGrams(nutrition_information.get("carbohydrates_in_grams").asInt());
-//        nuInfo.setCholesterolInMg(nutrition_information.get("cholesterol_in_mg").asInt());
-//        nuInfo.setSodiumInMg(nutrition_information.get("sodium_in_mg").asInt());
-//        nuInfo.setProteinInGrams(nutrition_information.get("protein_in_grams").asInt());
-//
-//    }
+    @RequestMapping(value="/v1/recipie/{id}",method = RequestMethod.PUT, consumes = "application/json")
+    public @ResponseBody
+    ResponseEntity<String>
+    createAccount(@RequestHeader(value="Authorization") String auth, @RequestBody ObjectNode objectNode, @PathVariable("id") String id){
+        byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
+        String decodedString = new String(decodedBytes);
+        String email = decodedString.split(":")[0];
+        String password = decodedString.split(":")[1];
+        if(!Authentication(email,password)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(" Only Author can update recipie Information");
+        }
 
-//    public boolean checkRecipieOwner(String email, String password, int recipieID) {
-//
-//    }
-//    @RequestMapping(value="/v1/user/self",method = RequestMethod.PUT, consumes = "application/json")
-//    public @ResponseBody ResponseEntity<String>
-//    updateUserInfo(@RequestHeader(value="Authorization") String auth, @RequestBody ObjectNode objectNode){
-//        byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
-//        String decodedString = new String(decodedBytes);
-//        String email = decodedString.split(":")[0];
-//        String password = decodedString.split(":")[1];
+        //find recipie which need to be updated
+        Recipie recipie_updated = recipieDao.getRecipieInfo(id);
+
+        recipie_updated.setCookTimeInMin(objectNode.get("cook_time_in_min").asInt());
+        recipie_updated.setPrepTimeInMin(objectNode.get("prep_time_in_min").asInt());
+        recipie_updated.setTitle(objectNode.get("title").asText());
+        recipie_updated.setCusine(objectNode.get("cusine").asText());
+        recipie_updated.setServings(objectNode.get("servings").asInt());
+        //set updated Time
+        Date dNow = new Date( );
+        SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        recipie_updated.setUpdatedTs(ft.format(dNow));
+
+        //delete_ingredients
+//        recipieDao.deleteIngredients(id);
+//        List<String> ingredients = new ArrayList<>();
+//        JsonNode str = objectNode.get("ingredients");
+//        for(JsonNode ingredient:str){
+//            String str_ingredient = ingredient.toString();
+//            ingredients.add(str_ingredient.substring(1,str_ingredient.length()-1));
+//        }
+//        recipie_updated.setIngredients(ingredients);
+
+        //orderedList
+        List<OrderedList> orderedLists = orderedListDao.getOrderedList(id);
+        ArrayNode arrayNode = objectNode.withArray("steps");
+        List<OrderedList> new_orderedLists = new LinkedList<>();
+        //updated former_orderList.size() >= updated_orderList.size()
+        if (orderedLists.size()>=arrayNode.size()) {
+            int i=0;
+            while ( i < orderedLists.size()) {
+                if(i<arrayNode.size()){
+                    JsonNode jsonNode = arrayNode.get(i);
+                    orderedLists.get(i).setPosition(jsonNode.get("position").asInt());
+                    orderedLists.get(i).setItems(jsonNode.get("items").asText());
+                    orderedListDao.update(orderedLists.get(i));
+                }else {
+                    orderedListDao.delete(orderedLists.get(i));
+                }
+                i++;
+            }
+        } else {
+            int i =0;
+            while (i <arrayNode.size()){
+                if (i<orderedLists.size()) {
+                    JsonNode jsonNode = arrayNode.get(i);
+                    orderedLists.get(i).setPosition(jsonNode.get("position").asInt());
+                    orderedLists.get(i).setItems(jsonNode.get("items").asText());
+                    orderedListDao.update(orderedLists.get(i));
+                } else {
+                    OrderedList orderedList = new OrderedList();
+                    orderedList.setPosition(arrayNode.get(i).get("position").asInt());
+                    orderedList.setItems(arrayNode.get(i).get("items").asText());
+                    orderedList.setRecipie(recipie_updated);
+                    new_orderedLists.add(orderedList);
+                }
+                i++;
+            }
+            if(new_orderedLists.size()>0){
+                recipie_updated.setSteps(new_orderedLists);
+            }
+        }
+        recipieDao.update(recipie_updated);
+        if (new_orderedLists.size()>0){
+            for(OrderedList ol:new_orderedLists){
+                ol.setRecipie(recipie_updated);
+                orderedListDao.save(ol);
+            }
+        }
+        //NutritionInforamtion update
+        NutritionInformation nuInfo = nutritionInformationDao.get(id);
+        JsonNode nutrition_information= objectNode.get("nutrition_information");
+        nuInfo.setCalories(nutrition_information.get("calories").asInt());
+        nuInfo.setCarbohydratesInGrams(nutrition_information.get("carbohydrates_in_grams").asInt());
+        nuInfo.setCholesterolInMg(nutrition_information.get("cholesterol_in_mg").asInt());
+        nuInfo.setSodiumInMg(nutrition_information.get("sodium_in_mg").asInt());
+        nuInfo.setProteinInGrams(nutrition_information.get("protein_in_grams").asInt());
+
+        recipie_updated.setNutritionInformation(nuInfo);
+        nutritionInformationDao.update(nuInfo);
+
+        return ResponseEntity.status(HttpStatus.OK).
+                body(id);
+    }
+
 @Autowired
 UserDao userDao;
     @Autowired
@@ -160,7 +212,6 @@ UserDao userDao;
         nutritionInformation.setSodiumInMg(nutritionInformationObjectNode.get("sodium_in_mg").asInt());
         nutritionInformation.setCarbohydratesInGrams(nutritionInformationObjectNode.get("carbohydrates_in_grams").asDouble());
         nutritionInformation.setProteinInGrams(nutritionInformationObjectNode.get("protein_in_grams").asDouble());
-        recipie.setNutritionInformation(nutritionInformation);
 
         nutritionInformation.setRecipie(recipie);
         recipie.setNutritionInformation(nutritionInformation);
@@ -206,12 +257,5 @@ UserDao userDao;
         }
 
     }
-
-
-
-
-
-
-
 
     }

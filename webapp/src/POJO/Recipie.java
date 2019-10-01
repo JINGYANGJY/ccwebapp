@@ -3,10 +3,6 @@ package POJO;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.stereotype.Component;
-
 import javax.persistence.*;
 
 @Entity
@@ -48,7 +44,7 @@ public class Recipie {
     @OneToMany(mappedBy = "recipie")
     private List<OrderedList> steps = new ArrayList<>();
 
-    @OneToOne(mappedBy = "recipie",cascade=CascadeType.ALL, optional = false,fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "recipie",cascade=CascadeType.ALL)
     private NutritionInformation nutritionInformation;
 
 

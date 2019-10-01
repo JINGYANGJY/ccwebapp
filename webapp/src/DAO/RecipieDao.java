@@ -1,12 +1,11 @@
 package DAO;
 
-import POJO.NutritionInformation;
-import POJO.OrderedList;
 import POJO.Recipie;
 import org.hibernate.query.Query;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.util.List;
 
 
@@ -26,50 +25,46 @@ public class RecipieDao extends Dao {
         return recipie;
     }
 
-//    public Recipie getRecipieInfo(int id) {
-//        try {
-//            begin();
-//            Query q = getSession().createQuery("from Recipie  where id = :id");
-//            q.setInteger("id", id);
-//            Recipie recipie = (Recipie) q.uniqueResult();
-//            commit();
-//            return recipie;
-//        } catch (Exception e) {
-//            super.rollback();
-//        } finally {
-//            super.close();
-//        }
-//        return null;
-//    }
-//
-//    public Recipie updateRecipie(Recipie recipie, int cookTimeInMin, int prepTimeInMin,
-//                                 int totalTimeInMin, String title, String cusine, int servings,
-//                                 List<String> ingredients, List<OrderedList> steps,
-//                                 NutritionInformation nutritionInformation) {
-//        try {
-//            recipie.setCookTimeInMin(cookTimeInMin);
-//            recipie.setPrepTimeInMin(prepTimeInMin);
-//            recipie.setTotalTimeInMin(totalTimeInMin);
-//            recipie.setTitle(title);
-//            recipie.setCusine(cusine);
-//            recipie.setServings(servings);
-//            recipie.setIngredients(ingredients);
-//            recipie.setSteps(steps);
-//            recipie.setNutritionInformation(nutritionInformation);
-//            Date dNow = new Date();
-//            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-//            recipie.setUpdatedTs(ft.format(ft));
-//
-//            getSession().update(recipie);
-//            commit();
-//            return recipie;
-//        } catch (Exception e) {
-//            super.rollback();
-//        } finally {
-//            super.close();
-//        }
-//        return null;
-//
-//    }
+    public Recipie getRecipieInfo(String id) {
+        try {
+            begin();
+            Query q = getSession().createQuery("from Recipie where id = :id");
+            q.setString("id", id);
+            Recipie recipie = (Recipie) q.uniqueResult();
+            commit();
+            return recipie;
+        } catch (Exception e) {
+            super.rollback();
+        } finally {
+            super.close();
+        }
+        return null;
+    }
+
+    public void update(Recipie recipie) {
+        try {
+            begin();
+            getSession().update(recipie);
+            commit();
+            close();
+        } catch (Exception e) {
+            super.rollback();
+            throw e;
+        }
+    }
+
+    public void deleteIngredients(String id) {
+       try{
+           begin();
+           List<String> list = getRecipieInfo(id).getIngredients();
+           for(String a : list) {
+               getSession().delete(a);
+           }
+           close();
+       }catch (Exception e) {
+           super.rollback();
+           throw e;
+       }
+    }
 
 }

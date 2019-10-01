@@ -41,7 +41,7 @@ public class Recipie {
     @Column(name="ingredient")
     private List<String> ingredients = new ArrayList<>();
 
-    @OneToMany(mappedBy = "recipie",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "recipie",cascade = CascadeType.REMOVE)
     private List<OrderedList> steps = new ArrayList<>();
 
     @OneToOne(mappedBy = "recipie",cascade=CascadeType.ALL)

@@ -11,6 +11,7 @@ import POJO.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.security.acl.Owner;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -30,6 +30,14 @@ public class RecipieController {
     //  2. while creating or updating a recipie, servings should be
     //  in [1,5] range.
 
+    @Autowired
+    UserDao userDao;
+    @Autowired
+    NutritionInformationDao nutritionInformationDao;
+    @Autowired
+    OrderedListDao orderedListDao;
+    @Autowired
+    RecipieDao recipieDao;
 
     @RequestMapping(value="/v1/recipie/{id}",method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody
@@ -132,19 +140,7 @@ public class RecipieController {
                 body(id);
     }
 
-@Autowired
-UserDao userDao;
-    @Autowired
-    NutritionInformationDao nutritionInformationDao;
-    @Autowired
-    OrderedListDao orderedListDao;
-    @Autowired
-    RecipieDao recipieDao;
-    // TODO: 1. while creating or updating a recipie, remember to
-    //  check ingredients items are unique or not;
-    //  2. while creating or updating a recipie, servings should be
-    //  in [1,5] range.
-    @RequestMapping(value = "/v1/recipie",method = RequestMethod.POST,consumes = "application/json")
+    @RequestMapping(value = "/v1/recipie/",method = RequestMethod.POST,consumes = "application/json")
     public @ResponseBody
     ResponseEntity<String> createRecipie(@RequestHeader(value="Authorization") String auth ,@RequestBody ObjectNode objectNode){
 
@@ -154,44 +150,46 @@ UserDao userDao;
         String password = decodedString.split(":")[1];
 
         if(!Authentication(email,password)){
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", " email and password is not matching");
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(" Only first name, last name and password can be updated");
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(jObject.toString());
         }
 
         Recipie recipie = new Recipie();
         recipie.setCookTimeInMin(objectNode.get("cook_time_in_min").asInt());
         recipie.setPrepTimeInMin(objectNode.get("prep_time_in_min").asInt());
+        //TODO: total
+        recipie.setTotalTimeInMin(objectNode.get("total_time_in_min").asInt());
         recipie.setTitle(objectNode.get("title").asText());
         recipie.setCusine(objectNode.get("cusine").asText());
         recipie.setServings(objectNode.get("servings").asInt());
         recipie.setId(UUID.randomUUID().toString());
-        //setAu
+        //set Author id
         String userId = userDao.getUserInfo(email).getId();
         recipie.setAuthorId(userId);
 
-
-        //setingrediens
+        //set ingredients
         List<String> ingredientsList = new ArrayList<>();
         JsonNode str = objectNode.get("ingredients");
-        for(JsonNode ingredient:str){
+        for(JsonNode ingredient : str){
             String str_ingredient = ingredient.toString();
-            ingredientsList.add(str_ingredient.substring(1,str_ingredient.length()-1));
+            ingredientsList.add(str_ingredient.substring(1, str_ingredient.length() - 1));
         }
-            recipie.setIngredients(ingredientsList);
+        recipie.setIngredients(ingredientsList);
 
-        //setTime
+        //set Time
         Date dNow = new Date( );
         SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         recipie.setCreatedTs(ft.format(dNow));
         recipie.setUpdatedTs(ft.format(dNow));
 
-
-        // setSteps
+        // set Steps
         List<OrderedList> orderedLists = new LinkedList<>();
         ArrayNode arrayNode = objectNode.withArray("steps");
 
-        for(JsonNode jsonNode:arrayNode){
+        for(JsonNode jsonNode : arrayNode){
             OrderedList orderedList = new OrderedList();
             orderedList.setPosition(jsonNode.get("position").asInt());
             orderedList.setItems(jsonNode.get("items").asText());
@@ -199,12 +197,6 @@ UserDao userDao;
             orderedLists.add(orderedList);
         }
         recipie.setSteps(orderedLists);
-        recipieDao.save(recipie);
-
-//        for(OrderedList ol:orderedLists){
-//            ol.setRecipie(recipie);
-//            orderedListDao.save(ol);
-//        }
 
         //setNutrition
         NutritionInformation nutritionInformation = new NutritionInformation();
@@ -214,15 +206,34 @@ UserDao userDao;
         nutritionInformation.setSodiumInMg(nutritionInformationObjectNode.get("sodium_in_mg").asInt());
         nutritionInformation.setCarbohydratesInGrams(nutritionInformationObjectNode.get("carbohydrates_in_grams").asDouble());
         nutritionInformation.setProteinInGrams(nutritionInformationObjectNode.get("protein_in_grams").asDouble());
-
         nutritionInformation.setRecipie(recipie);
+
         recipie.setNutritionInformation(nutritionInformation);
+        recipieDao.save(recipie);
+        for(OrderedList ol : orderedLists){
+            orderedListDao.save(ol);
+        }
         nutritionInformationDao.save(nutritionInformation);
 
-        return ResponseEntity.status(HttpStatus.OK).
-                body(str.toString());
+        JSONObject jObject = new JSONObject();
+        jObject.put("id", recipie.getId());
+        jObject.put("created_ts", recipie.getCreatedTs());
+        jObject.put("updated_ts", recipie.getUpdatedTs());
+        jObject.put("author_id", recipie.getAuthorId());
+        jObject.put("cook_time_in_min", recipie.getCookTimeInMin());
+        jObject.put("prep_time_in_min", recipie.getPrepTimeInMin());
+        jObject.put("total_time_in_min", recipie.getTotalTimeInMin());
+        jObject.put("title", recipie.getTitle());
+        jObject.put("cusine", recipie.getCusine());
+        jObject.put("servings", recipie.getServings());
+        jObject.put("ingredients", objectNode.get("ingredients"));
+        jObject.put("steps", objectNode.get("steps"));
+        jObject.put("nutrition_information", objectNode.get("nutrition_information"));
 
+        return ResponseEntity.status(HttpStatus.CREATED).
+                body(jObject.toString());
     }
+
     public boolean Authentication(String userName, String password) {
         if(userDao.getUserInfo(userName)==null) return false;
         String stored_hash = userDao.getUserInfo(userName).getPassword();
@@ -232,32 +243,50 @@ UserDao userDao;
             return false;
         }
     }
+
     @RequestMapping(value = "/v1/recipie/*",method = RequestMethod.DELETE)
     public @ResponseBody
-    ResponseEntity<String> createRecipie(@RequestHeader(value="Authorization") String auth, HttpServletRequest request){
+    ResponseEntity<String> deleteRecipie(@RequestHeader(value="Authorization") String auth, HttpServletRequest request){
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
         String password = decodedString.split(":")[1];
         String[] URI = request.getRequestURI().split("/");
+        if (URI.length == 4) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "recipie id is required");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
         Recipie recipie = recipieDao.getRecipieInfo(URI[4]);
-        User user =userDao.getUserInfo(email);
-        if(!Authentication(email,password) || !user.getId().equals(recipie.getAuthorId())){
+        User user = userDao.getUserInfo(email);
+        if(!Authentication(email, password)) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "email and password is not matching");
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("hhaha gun qu yanzheng");
-        }else if(recipie==null){
+                    .body(jObject.toString());
+        }
+        if(recipie == null){
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "Recipie with id " + URI[4] + " does not exist");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(URI[4]);
-        }else {
-
-            recipieDao.delete(recipie);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body("gaoding");
+                    .body(jObject.toString());
         }
-
+        if(!user.getId().equals(recipie.getAuthorId())) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "you're not authorized to delete this recipie");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(jObject.toString());
+        }
+        recipieDao.delete(recipie);
+        JSONObject jObject = new JSONObject();
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(jObject.toString());
     }
 
-    }
+}

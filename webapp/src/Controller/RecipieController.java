@@ -7,9 +7,11 @@ import DAO.UserDao;
 import POJO.NutritionInformation;
 import POJO.OrderedList;
 import POJO.Recipie;
+import POJO.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.acl.Owner;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -67,6 +70,13 @@ public class RecipieController {
 //    public boolean checkRecipieOwner(String email, String password, int recipieID) {
 //
 //    }
+//    @RequestMapping(value="/v1/user/self",method = RequestMethod.PUT, consumes = "application/json")
+//    public @ResponseBody ResponseEntity<String>
+//    updateUserInfo(@RequestHeader(value="Authorization") String auth, @RequestBody ObjectNode objectNode){
+//        byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
+//        String decodedString = new String(decodedBytes);
+//        String email = decodedString.split(":")[0];
+//        String password = decodedString.split(":")[1];
 @Autowired
 UserDao userDao;
     @Autowired
@@ -81,7 +91,18 @@ UserDao userDao;
     //  in [1,5] range.
     @RequestMapping(value = "/v2/recipie",method = RequestMethod.POST,consumes = "application/json")
     public @ResponseBody
-    ResponseEntity<String> createRecipie(@RequestBody ObjectNode objectNode){
+    ResponseEntity<String> createRecipie(@RequestHeader(value="Authorization") String auth ,@RequestBody ObjectNode objectNode){
+
+        byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
+        String decodedString = new String(decodedBytes);
+        String email = decodedString.split(":")[0];
+        String password = decodedString.split(":")[1];
+
+        if(!Authentication(email,password)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(" Only first name, last name and password can be updated");
+        }
 
         Recipie recipie = new Recipie();
         recipie.setCookTimeInMin(objectNode.get("cook_time_in_min").asInt());
@@ -89,8 +110,27 @@ UserDao userDao;
         recipie.setTitle(objectNode.get("title").asText());
         recipie.setCusine(objectNode.get("cusine").asText());
         recipie.setServings(objectNode.get("servings").asInt());
-//
-//        recipieDao.save(recipie);
+        recipie.setId(UUID.randomUUID().toString());
+        //setAu
+        String userId = userDao.getUserInfo(email).getId();
+        recipie.setAuthorId(userId);
+
+
+        //setingrediens
+        List<String> ingredientsList = new ArrayList<>();
+        JsonNode str = objectNode.get("ingredients");
+        for(JsonNode ingredient:str){
+            String str_ingredient = ingredient.toString();
+            ingredientsList.add(str_ingredient.substring(1,str_ingredient.length()-1));
+        }
+            recipie.setIngredients(ingredientsList);
+
+        //setTime
+        Date dNow = new Date( );
+        SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        recipie.setCreatedTs(ft.format(dNow));
+        recipie.setUpdatedTs(ft.format(dNow));
+
 
         // setSteps
         List<OrderedList> orderedLists = new LinkedList<>();
@@ -104,6 +144,12 @@ UserDao userDao;
             orderedLists.add(orderedList);
         }
         recipie.setSteps(orderedLists);
+        recipieDao.save(recipie);
+
+        for(OrderedList ol:orderedLists){
+            ol.setRecipie(recipie);
+            orderedListDao.save(ol);
+        }
 
         //setNutrition
         NutritionInformation nutritionInformation = new NutritionInformation();
@@ -115,24 +161,21 @@ UserDao userDao;
         nutritionInformation.setProteinInGrams(nutritionInformationObjectNode.get("protein_in_grams").asDouble());
         recipie.setNutritionInformation(nutritionInformation);
 
-        recipieDao.save(recipie);
-
-        for(OrderedList ol:orderedLists){
-            ol.setRecipie(recipie);
-            orderedListDao.save(ol);
-        }
-
         nutritionInformation.setRecipie(recipie);
+        recipie.setNutritionInformation(nutritionInformation);
         nutritionInformationDao.save(nutritionInformation);
-//        recipie.setNutritionInformation(nutritionInformation);
 
-//        recipie.setId(UUID.randomUUID().toString());
-
-
-
-//        recipieDao.save(recipie);
         return ResponseEntity.status(HttpStatus.OK).
-                body(recipie.getId());
+                body(str.toString());
 
+    }
+    public boolean Authentication(String userName, String password) {
+        if(userDao.getUserInfo(userName)==null) return false;
+        String stored_hash = userDao.getUserInfo(userName).getPassword();
+        if (BCrypt.checkpw(password, stored_hash)) {
+            return true;
+        } else{
+            return false;
+        }
     }
 }

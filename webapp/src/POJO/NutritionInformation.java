@@ -12,6 +12,7 @@ public class NutritionInformation {
     @Id
     @GenericGenerator(name = "generator", strategy = "foreign",
             parameters = @Parameter(name = "property", value = "recipie"))
+    @GeneratedValue(generator = "generator")
     @Column(name ="id")
     private String id;
     @Column(name="calories")

@@ -15,8 +15,8 @@ public class Recipie {
 
 
     @Id
-    @GeneratedValue(generator = "generator")
-    @GenericGenerator(name="generator",strategy = "uuid2")
+//    @GeneratedValue(generator = "generator")
+//    @GenericGenerator(name="generator",strategy = "uuid2")
     @Column(name="id")
     private String id;
     @Column (name = "created_ts")
@@ -45,11 +45,12 @@ public class Recipie {
     @Column(name="ingredient")
     private List<String> ingredients = new ArrayList<>();
 
-    @OneToMany(mappedBy = "recipie")
+    @OneToMany(mappedBy = "recipie",cascade = CascadeType.ALL)
     private List<OrderedList> steps = new ArrayList<>();
 
-    @OneToOne(mappedBy = "recipie")
+    @OneToOne(mappedBy = "recipie",cascade=CascadeType.ALL, optional = false,fetch = FetchType.LAZY)
     private NutritionInformation nutritionInformation;
+
 
 
 

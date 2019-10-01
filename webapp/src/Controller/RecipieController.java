@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.acl.Owner;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -89,7 +90,7 @@ UserDao userDao;
     //  check ingredients items are unique or not;
     //  2. while creating or updating a recipie, servings should be
     //  in [1,5] range.
-    @RequestMapping(value = "/v2/recipie",method = RequestMethod.POST,consumes = "application/json")
+    @RequestMapping(value = "/v1/recipie",method = RequestMethod.POST,consumes = "application/json")
     public @ResponseBody
     ResponseEntity<String> createRecipie(@RequestHeader(value="Authorization") String auth ,@RequestBody ObjectNode objectNode){
 
@@ -178,4 +179,39 @@ UserDao userDao;
             return false;
         }
     }
-}
+    @RequestMapping(value = "/v1/recipie/*",method = RequestMethod.DELETE)
+    public @ResponseBody
+    ResponseEntity<String> createRecipie(@RequestHeader(value="Authorization") String auth, HttpServletRequest request){
+        byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
+        String decodedString = new String(decodedBytes);
+        String email = decodedString.split(":")[0];
+        String password = decodedString.split(":")[1];
+        String[] URI = request.getRequestURI().split("/");
+        Recipie recipie = recipieDao.getRecipieInfo(URI[4]);
+        User user =userDao.getUserInfo(email);
+        if(!Authentication(email,password) || !user.getId().equals(recipie.getAuthorId())){
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("hhaha gun qu yanzheng");
+        }else if(recipie==null){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(URI[4]);
+        }else {
+
+            recipieDao.delete(recipie);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("gaoding");
+        }
+
+    }
+
+
+
+
+
+
+
+
+    }

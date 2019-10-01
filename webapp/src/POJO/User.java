@@ -6,12 +6,10 @@ import org.springframework.stereotype.Component;
 import javax.persistence.*;
 
 @Entity
-@Component
 @Table(name="user")
 public class User {
     @Id
-    @GeneratedValue
-    @Column(name="id",unique = true,nullable =false)
+    @Column(name="id")
     private String id;
     @Column(name="email_address")
     private String email;

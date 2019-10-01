@@ -11,6 +11,7 @@ import java.util.List;
 
 public class RecipieDao extends Dao {
 
+
     public Recipie save(Recipie recipie)  {
         try {
             super.begin();
@@ -25,10 +26,26 @@ public class RecipieDao extends Dao {
         return recipie;
     }
 
+
+    public boolean delete(Recipie recipie){
+        try {
+            super.begin();
+
+            getSession().delete(recipie);
+            super.commit();
+        } catch (Exception e) {
+            super.rollback();
+            return false;
+        } finally {
+            super.close();
+        }
+        return true;
+    }
+
     public Recipie getRecipieInfo(String id) {
         try {
             begin();
-            Query q = getSession().createQuery("from Recipie where id = :id");
+            Query q = getSession().createQuery("from Recipie  where id = :id");
             q.setString("id", id);
             Recipie recipie = (Recipie) q.uniqueResult();
             commit();
@@ -66,5 +83,4 @@ public class RecipieDao extends Dao {
            throw e;
        }
     }
-
 }

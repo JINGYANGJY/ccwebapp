@@ -39,14 +39,17 @@ public class RecipieController {
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
         String password = decodedString.split(":")[1];
-        if(!Authentication(email,password)){
+        User user = userDao.getUserInfo(email);
+        //find recipie which need to be updated
+        Recipie recipie_updated = recipieDao.getRecipieInfo(id);
+        if(!Authentication(email,password) || !user.getId().equals(recipie_updated.getAuthorId())){
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(" Only Author can update recipie Information");
+        } else if(recipie_updated == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        //find recipie which need to be updated
-        Recipie recipie_updated = recipieDao.getRecipieInfo(id);
 
         recipie_updated.setCookTimeInMin(objectNode.get("cook_time_in_min").asInt());
         recipie_updated.setPrepTimeInMin(objectNode.get("prep_time_in_min").asInt());
@@ -58,15 +61,14 @@ public class RecipieController {
         SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         recipie_updated.setUpdatedTs(ft.format(dNow));
 
-        //delete_ingredients
-//        recipieDao.deleteIngredients(id);
-//        List<String> ingredients = new ArrayList<>();
-//        JsonNode str = objectNode.get("ingredients");
-//        for(JsonNode ingredient:str){
-//            String str_ingredient = ingredient.toString();
-//            ingredients.add(str_ingredient.substring(1,str_ingredient.length()-1));
-//        }
-//        recipie_updated.setIngredients(ingredients);
+        //update_ingredients
+        List<String> ingredients = new ArrayList<>();
+        JsonNode str = objectNode.get("ingredients");
+        for(JsonNode ingredient:str){
+            String str_ingredient = ingredient.toString();
+            ingredients.add(str_ingredient.substring(1,str_ingredient.length()-1));
+        }
+        recipie_updated.setIngredients(ingredients);
 
         //orderedList
         List<OrderedList> orderedLists = orderedListDao.getOrderedList(id);
@@ -199,10 +201,10 @@ UserDao userDao;
         recipie.setSteps(orderedLists);
         recipieDao.save(recipie);
 
-        for(OrderedList ol:orderedLists){
-            ol.setRecipie(recipie);
-            orderedListDao.save(ol);
-        }
+//        for(OrderedList ol:orderedLists){
+//            ol.setRecipie(recipie);
+//            orderedListDao.save(ol);
+//        }
 
         //setNutrition
         NutritionInformation nutritionInformation = new NutritionInformation();

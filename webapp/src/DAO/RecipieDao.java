@@ -16,7 +16,7 @@ public class RecipieDao extends Dao {
         try {
             super.begin();
 
-            getSession().save(recipie);
+            getSession().saveOrUpdate(recipie);
             super.commit();
         } catch (Exception e) {
             super.rollback();
@@ -68,19 +68,5 @@ public class RecipieDao extends Dao {
             super.rollback();
             throw e;
         }
-    }
-
-    public void deleteIngredients(String id) {
-       try{
-           begin();
-           List<String> list = getRecipieInfo(id).getIngredients();
-           for(String a : list) {
-               getSession().delete(a);
-           }
-           close();
-       }catch (Exception e) {
-           super.rollback();
-           throw e;
-       }
     }
 }

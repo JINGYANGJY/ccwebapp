@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Controller
 public class RecipieController {
@@ -65,6 +66,25 @@ public class RecipieController {
             jObject.put("message", "you're not authorized to update this recipie");
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
+                    .body(jObject.toString());
+        }
+        String missing_field = checkRequiredInput(objectNode);
+        if (missing_field != null) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", missing_field + " is missing");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
+
+        boolean isCookMatch = inputIntegerCheck(objectNode.get("cook_time_in_min").asText());
+        boolean isPrepMatch =inputIntegerCheck(objectNode.get("prep_time_in_min").asText());
+        boolean isServingsMatch = inputIntegerCheck(objectNode.get("servings").asText());
+        if (!(isCookMatch && isPrepMatch && isServingsMatch)) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the format of cook time, prep time or servings is wrong, should be integer");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
 
@@ -118,6 +138,14 @@ public class RecipieController {
             while ( i < orderedLists.size()) {
                 if(i < arrayNode.size()){
                     JsonNode jsonNode = arrayNode.get(i);
+                    boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
+                    if (!isPositionMatch) {
+                        JSONObject jObject = new JSONObject();
+                        jObject.put("message", "the format of position is wrong, should be integer");
+                        return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(jObject.toString());
+                    }
                     int position = jsonNode.get("position").asInt();
                     if (position < 1) {
                         JSONObject jObject = new JSONObject();
@@ -139,6 +167,14 @@ public class RecipieController {
             while (i < arrayNode.size()){
                 if (i < orderedLists.size()) {
                     JsonNode jsonNode = arrayNode.get(i);
+                    boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
+                    if (!isPositionMatch) {
+                        JSONObject jObject = new JSONObject();
+                        jObject.put("message", "the format of position is wrong, should be integer");
+                        return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(jObject.toString());
+                    }
                     int position = jsonNode.get("position").asInt();
                     if (position < 1) {
                         JSONObject jObject = new JSONObject();
@@ -152,6 +188,14 @@ public class RecipieController {
                     orderedListDao.update(orderedLists.get(i));
                 } else {
                     OrderedList orderedList = new OrderedList();
+                    boolean isPositionMatch = inputIntegerCheck(arrayNode.get(i).get("position").asText());
+                    if (!isPositionMatch) {
+                        JSONObject jObject = new JSONObject();
+                        jObject.put("message", "the format of position is wrong, should be integer");
+                        return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(jObject.toString());
+                    }
                     int position = arrayNode.get(i).get("position").asInt();
                     if (position < 1) {
                         JSONObject jObject = new JSONObject();
@@ -171,7 +215,7 @@ public class RecipieController {
                 recipie_updated.setSteps(new_orderedLists);
             }
         }
-        recipieDao.update(recipie_updated);
+//        recipieDao.update(recipie_updated);
         if (new_orderedLists.size() > 0){
             for(OrderedList ol : new_orderedLists){
                 ol.setRecipie(recipie_updated);
@@ -180,7 +224,32 @@ public class RecipieController {
         }
         //NutritionInforamtion update
         NutritionInformation nuInfo = nutritionInformationDao.get(id);
-        JsonNode nutrition_information= objectNode.get("nutrition_information");
+//        JsonNode nutrition_information = objectNode.get("nutrition_information");
+
+        ObjectNode nutrition_information = objectNode.with("nutrition_information");
+        String field = checkNutritionInput(nutrition_information);
+        if (field != null) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", field + " is missing");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
+
+        // input check
+        boolean check = inputIntegerCheck(nutrition_information.get("calories").asText()) &&
+                inputFloatCheck(nutrition_information.get("carbohydrates_in_grams").asText()) &&
+                inputFloatCheck(nutrition_information.get("cholesterol_in_mg").asText()) &&
+                inputIntegerCheck(nutrition_information.get("sodium_in_mg").asText()) &&
+                inputFloatCheck(nutrition_information.get("protein_in_grams").asText());
+        if (!check) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the format of nutrition information is wrong");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
+
         nuInfo.setCalories(nutrition_information.get("calories").asInt());
         nuInfo.setCarbohydratesInGrams(nutrition_information.get("carbohydrates_in_grams").asDouble());
         nuInfo.setCholesterolInMg(nutrition_information.get("cholesterol_in_mg").asDouble());
@@ -189,6 +258,7 @@ public class RecipieController {
 
         recipie_updated.setNutritionInformation(nuInfo);
         nutritionInformationDao.update(nuInfo);
+        recipieDao.update(recipie_updated);
 
         JSONObject jObject = recipieParser(recipie_updated);
         return ResponseEntity.status(HttpStatus.OK).
@@ -212,7 +282,27 @@ public class RecipieController {
                     .body(jObject.toString());
         }
 
+        String missing_field = checkRequiredInput(objectNode);
+        if (missing_field != null) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", missing_field + " is missing");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
+
         Recipie recipie = new Recipie();
+
+        boolean isCookMatch = inputIntegerCheck(objectNode.get("cook_time_in_min").asText());
+        boolean isPrepMatch =inputIntegerCheck(objectNode.get("prep_time_in_min").asText());
+        boolean isServingsMatch = inputIntegerCheck(objectNode.get("servings").asText());
+        if (!(isCookMatch && isPrepMatch && isServingsMatch)) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the format of cook time, prep time or servings is wrong, should be integer");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
 
         int cook_time = objectNode.get("cook_time_in_min").asInt();
         int prep_time = objectNode.get("prep_time_in_min").asInt();
@@ -267,6 +357,14 @@ public class RecipieController {
 
         for(JsonNode jsonNode : arrayNode){
             OrderedList orderedList = new OrderedList();
+            boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
+            if (!isPositionMatch) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("message", "the format of position is wrong, should be integer");
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(jObject.toString());
+            }
             int position = jsonNode.get("position").asInt();
             if (position < 1) {
                 JSONObject jObject = new JSONObject();
@@ -285,6 +383,30 @@ public class RecipieController {
         //setNutrition
         NutritionInformation nutritionInformation = new NutritionInformation();
         ObjectNode nutritionInformationObjectNode = objectNode.with("nutrition_information");
+
+        String field = checkNutritionInput(nutritionInformationObjectNode);
+        if (field != null) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", field + " is missing");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
+
+        // input check for nutrition info
+        boolean check = inputIntegerCheck(nutritionInformationObjectNode.get("calories").asText()) &&
+                inputFloatCheck(nutritionInformationObjectNode.get("carbohydrates_in_grams").asText()) &&
+                inputFloatCheck(nutritionInformationObjectNode.get("cholesterol_in_mg").asText()) &&
+                inputIntegerCheck(nutritionInformationObjectNode.get("sodium_in_mg").asText()) &&
+                inputFloatCheck(nutritionInformationObjectNode.get("protein_in_grams").asText());
+        if (!check) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the format of nutrition information is wrong");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
+
         nutritionInformation.setCalories(nutritionInformationObjectNode.get("calories").asInt());
         nutritionInformation.setCholesterolInMg(nutritionInformationObjectNode.get("cholesterol_in_mg").asInt());
         nutritionInformation.setSodiumInMg(nutritionInformationObjectNode.get("sodium_in_mg").asInt());
@@ -413,5 +535,62 @@ public class RecipieController {
         jObject.put("nutrition_information", nuinfo);
 
         return jObject;
+    }
+
+    private boolean inputIntegerCheck(String input) {
+        String intPattern = "^[1-9]\\d*$";
+        return Pattern.matches(intPattern, input);
+    }
+
+    private boolean inputFloatCheck(String input) {
+        String floatPattern = "^([1-9]*[1-9][0-9]*(\\.[0-9]+)?|[0]+\\.[0-9]*[1-9][0-9]*)$";
+        return Pattern.matches(floatPattern, input);
+    }
+
+    private String checkRequiredInput(ObjectNode objectNode) {
+        Iterator<String> fieldNames = objectNode.fieldNames();
+        List<String> requiredFields = new ArrayList<String>();
+        List<String> inputFields = new ArrayList<String>();
+        requiredFields.add("cook_time_in_min");
+        requiredFields.add("prep_time_in_min");
+        requiredFields.add("title");
+        requiredFields.add("cusine");
+        requiredFields.add("servings");
+        requiredFields.add("ingredients");
+        requiredFields.add("steps");
+        requiredFields.add("nutrition_information");
+
+        while(fieldNames.hasNext()) {
+            String field = fieldNames.next();
+            inputFields.add(field);
+        }
+        for (String field : requiredFields) {
+            if (!inputFields.contains(field)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    private String checkNutritionInput(ObjectNode objectNode) {
+        Iterator<String> fieldNames = objectNode.fieldNames();
+        List<String> requiredFields = new ArrayList<String>();
+        List<String> inputFields = new ArrayList<String>();
+        requiredFields.add("calories");
+        requiredFields.add("cholesterol_in_mg");
+        requiredFields.add("sodium_in_mg");
+        requiredFields.add("carbohydrates_in_grams");
+        requiredFields.add("protein_in_grams");
+
+        while(fieldNames.hasNext()) {
+            String field = fieldNames.next();
+            inputFields.add(field);
+        }
+        for (String field : requiredFields) {
+            if (!inputFields.contains(field)) {
+                return field;
+            }
+        }
+        return null;
     }
 }

@@ -26,10 +26,13 @@ public class UserController {
     public @ResponseBody ResponseEntity<String>
     createAccount(@RequestBody ObjectNode objectNode){
         if(objectNode.get("first_name")==null||objectNode.get("last_name")==null||
-                objectNode.get("email_address")==null||objectNode.get("password")==null)
+                objectNode.get("email_address")==null||objectNode.get("password")==null) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "Required info Cannot be null");
             return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body("Required info Cannot be null");
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
         String firstName = objectNode.get("first_name").asText();
         String lastName = objectNode.get("last_name").asText();
         String email = objectNode.get("email_address").asText();
@@ -41,15 +44,19 @@ public class UserController {
         boolean isEmailMatch = Pattern.matches(emailPattern, email);
 
         if(!isEmailMatch) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "Please use correct email");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body("Please use correct email");
+                    .body(jObject.toString());
         }
 
         if(!isPassMatch) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "Please use Strong Password");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body("Please use Strong Password");
+                    .body(jObject.toString());
         }
 
         String pw_hash = BCrypt.hashpw(password, BCrypt.gensalt());
@@ -73,9 +80,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).
                     body(jObject.toString());
         } else {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "Email Address Already Exists");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body("Email Address Already Exists");
+                    .body(jObject.toString());
         }
     }
 
@@ -100,9 +109,11 @@ public class UserController {
                     body(jObject.toString());
         }
         else {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "Unable to get any other user info");
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Unable to get any other user info");
+                    .body(jObject.toString());
         }
     }
 
@@ -120,9 +131,11 @@ public class UserController {
             while(fieldNames.hasNext()) {
                 String field = fieldNames.next();
                 if(!(field.equals("first_name") || field.equals("last_name") || field.equals("password"))) {
+                    JSONObject jObject = new JSONObject();
+                    jObject.put("message", "Only first name, last name and password can be updated");
                     return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
-                            .body(" Only first name, last name and password can be updated");
+                            .body(jObject.toString());
                 }
             }
             User user = userDao.getUserInfo(email);
@@ -139,21 +152,26 @@ public class UserController {
                 boolean isMatch = Pattern.matches(pattern, newPassword);
 
                 if(!isMatch) {
+                    JSONObject jObject = new JSONObject();
+                    jObject.put("message", "Please use Strong Password");
                     return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
-                            .body("Please use Strong Password");
+                            .body(jObject.toString());
                 }
                 newPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
             }
             userDao.updateUser(user, newFirstName, newLastName, newPassword);
 
+            JSONObject jObject = new JSONObject();
             return ResponseEntity.status(HttpStatus.NO_CONTENT).
-                    body("");
+                    body(jObject.toString());
         }
         else {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "Unable to update any other user info");
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Unable to update any other user info");
+                    .body(jObject.toString());
         }
     }
 

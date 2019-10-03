@@ -240,37 +240,44 @@ public class RecipieController {
         //NutritionInforamtion update
         NutritionInformation nuInfo = nutritionInformationDao.get(id);
 //        JsonNode nutrition_information = objectNode.get("nutrition_information");
+        try{
+            ObjectNode nutrition_information = objectNode.with("nutrition_information");
+            String field = checkNutritionInput(nutrition_information);
+            if (field != null) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("message", field + " is missing");
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(jObject.toString());
+            }
 
-        ObjectNode nutrition_information = objectNode.with("nutrition_information");
-        String field = checkNutritionInput(nutrition_information);
-        if (field != null) {
+            // input check
+            boolean check = inputIntegerCheck(nutrition_information.get("calories").asText()) &&
+                    inputFloatCheck(nutrition_information.get("carbohydrates_in_grams").asText()) &&
+                    inputFloatCheck(nutrition_information.get("cholesterol_in_mg").asText()) &&
+                    inputIntegerCheck(nutrition_information.get("sodium_in_mg").asText()) &&
+                    inputFloatCheck(nutrition_information.get("protein_in_grams").asText());
+            if (!check) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("message", "the format of nutrition information is wrong");
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(jObject.toString());
+            }
+
+            nuInfo.setCalories(nutrition_information.get("calories").asInt());
+            nuInfo.setCarbohydratesInGrams(nutrition_information.get("carbohydrates_in_grams").asDouble());
+            nuInfo.setCholesterolInMg(nutrition_information.get("cholesterol_in_mg").asDouble());
+            nuInfo.setSodiumInMg(nutrition_information.get("sodium_in_mg").asInt());
+            nuInfo.setProteinInGrams(nutrition_information.get("protein_in_grams").asDouble());
+        } catch (Exception e) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", field + " is missing");
+            jObject.put("message", "the format of nutrition information should be a pojo");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-
-        // input check
-        boolean check = inputIntegerCheck(nutrition_information.get("calories").asText()) &&
-                inputFloatCheck(nutrition_information.get("carbohydrates_in_grams").asText()) &&
-                inputFloatCheck(nutrition_information.get("cholesterol_in_mg").asText()) &&
-                inputIntegerCheck(nutrition_information.get("sodium_in_mg").asText()) &&
-                inputFloatCheck(nutrition_information.get("protein_in_grams").asText());
-        if (!check) {
-            JSONObject jObject = new JSONObject();
-            jObject.put("message", "the format of nutrition information is wrong");
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(jObject.toString());
-        }
-
-        nuInfo.setCalories(nutrition_information.get("calories").asInt());
-        nuInfo.setCarbohydratesInGrams(nutrition_information.get("carbohydrates_in_grams").asDouble());
-        nuInfo.setCholesterolInMg(nutrition_information.get("cholesterol_in_mg").asDouble());
-        nuInfo.setSodiumInMg(nutrition_information.get("sodium_in_mg").asInt());
-        nuInfo.setProteinInGrams(nutrition_information.get("protein_in_grams").asDouble());
-
+        
         recipie_updated.setNutritionInformation(nuInfo);
         nutritionInformationDao.update(nuInfo);
         recipieDao.update(recipie_updated);
@@ -411,37 +418,45 @@ public class RecipieController {
 
         //setNutrition
         NutritionInformation nutritionInformation = new NutritionInformation();
-        ObjectNode nutritionInformationObjectNode = objectNode.with("nutrition_information");
+        try{
+            ObjectNode nutritionInformationObjectNode = objectNode.with("nutrition_information");
+            String field = checkNutritionInput(nutritionInformationObjectNode);
+            if (field != null) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("message", field + " is missing");
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(jObject.toString());
+            }
 
-        String field = checkNutritionInput(nutritionInformationObjectNode);
-        if (field != null) {
+            // input check for nutrition info
+            boolean check = inputIntegerCheck(nutritionInformationObjectNode.get("calories").asText()) &&
+                    inputFloatCheck(nutritionInformationObjectNode.get("carbohydrates_in_grams").asText()) &&
+                    inputFloatCheck(nutritionInformationObjectNode.get("cholesterol_in_mg").asText()) &&
+                    inputIntegerCheck(nutritionInformationObjectNode.get("sodium_in_mg").asText()) &&
+                    inputFloatCheck(nutritionInformationObjectNode.get("protein_in_grams").asText());
+            if (!check) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("message", "the format of nutrition information is wrong");
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(jObject.toString());
+            }
+
+            nutritionInformation.setCalories(nutritionInformationObjectNode.get("calories").asInt());
+            nutritionInformation.setCholesterolInMg(nutritionInformationObjectNode.get("cholesterol_in_mg").asInt());
+            nutritionInformation.setSodiumInMg(nutritionInformationObjectNode.get("sodium_in_mg").asInt());
+            nutritionInformation.setCarbohydratesInGrams(nutritionInformationObjectNode.get("carbohydrates_in_grams").asDouble());
+            nutritionInformation.setProteinInGrams(nutritionInformationObjectNode.get("protein_in_grams").asDouble());
+            nutritionInformation.setRecipie(recipie);
+
+        }catch (Exception e) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", field + " is missing");
+            jObject.put("message", "the format of nutrition information should be a pojo");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-
-        // input check for nutrition info
-        boolean check = inputIntegerCheck(nutritionInformationObjectNode.get("calories").asText()) &&
-                inputFloatCheck(nutritionInformationObjectNode.get("carbohydrates_in_grams").asText()) &&
-                inputFloatCheck(nutritionInformationObjectNode.get("cholesterol_in_mg").asText()) &&
-                inputIntegerCheck(nutritionInformationObjectNode.get("sodium_in_mg").asText()) &&
-                inputFloatCheck(nutritionInformationObjectNode.get("protein_in_grams").asText());
-        if (!check) {
-            JSONObject jObject = new JSONObject();
-            jObject.put("message", "the format of nutrition information is wrong");
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(jObject.toString());
-        }
-
-        nutritionInformation.setCalories(nutritionInformationObjectNode.get("calories").asInt());
-        nutritionInformation.setCholesterolInMg(nutritionInformationObjectNode.get("cholesterol_in_mg").asInt());
-        nutritionInformation.setSodiumInMg(nutritionInformationObjectNode.get("sodium_in_mg").asInt());
-        nutritionInformation.setCarbohydratesInGrams(nutritionInformationObjectNode.get("carbohydrates_in_grams").asDouble());
-        nutritionInformation.setProteinInGrams(nutritionInformationObjectNode.get("protein_in_grams").asDouble());
-        nutritionInformation.setRecipie(recipie);
 
         recipie.setNutritionInformation(nutritionInformation);
         recipieDao.save(recipie);

@@ -1,7 +1,6 @@
 package DAO;
 
 import POJO.User;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 
 import java.text.SimpleDateFormat;

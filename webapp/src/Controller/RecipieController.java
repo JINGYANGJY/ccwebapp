@@ -122,9 +122,9 @@ public class RecipieController {
         //update_ingredients
         List<String> ingredients = new ArrayList<>();
         JsonNode str = objectNode.get("ingredients");
-        if(!str.isArray()) {
+        if(!str.isArray() || str.size() ==0 ) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "the value of ingredients should be an array");
+            jObject.put("message", "the value of ingredients should be an array with length > 0");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -139,6 +139,13 @@ public class RecipieController {
         List<OrderedList> orderedLists = orderedListDao.getOrderedList(id);
         try {
             ArrayNode arrayNode = objectNode.withArray("steps");
+            if (arrayNode.size()==0) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("message", "the steps should not be null");
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(jObject.toString());
+            }
             List<OrderedList> new_orderedLists = new LinkedList<>();
             //updated former_orderList.size() >= updated_orderList.size()
             if (orderedLists.size() >= arrayNode.size()) {
@@ -277,7 +284,7 @@ public class RecipieController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-        
+
         recipie_updated.setNutritionInformation(nuInfo);
         nutritionInformationDao.update(nuInfo);
         recipieDao.update(recipie_updated);
@@ -361,9 +368,9 @@ public class RecipieController {
         //set ingredients
         List<String> ingredientsList = new ArrayList<>();
         JsonNode str = objectNode.get("ingredients");
-        if(!str.isArray()) {
+        if(!str.isArray() || str.size() ==0 ) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "the value of ingredients should be an array");
+            jObject.put("message", "the value of ingredients should be an array with length > 0");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -384,6 +391,13 @@ public class RecipieController {
         List<OrderedList> orderedLists = new LinkedList<>();
         try{
             ArrayNode arrayNode = objectNode.withArray("steps");
+            if (arrayNode.size()==0) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("message", "the steps should not be null");
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(jObject.toString());
+            }
             for(JsonNode jsonNode : arrayNode){
                 OrderedList orderedList = new OrderedList();
                 boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());

@@ -52,7 +52,8 @@ public class Dao {
     }
 
     public static void close() {
-        getSession().close();
-        Dao.sessionThread.set(null);
+        // TODO: comment for now to prevent issues
+//        getSession().close();
+//        Dao.sessionThread.set(null);
     }
 }

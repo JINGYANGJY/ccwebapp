@@ -122,6 +122,13 @@ public class RecipieController {
         //update_ingredients
         List<String> ingredients = new ArrayList<>();
         JsonNode str = objectNode.get("ingredients");
+        if(!str.isArray()) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the value of ingredients should be an array");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
         for(JsonNode ingredient : str){
             String str_ingredient = ingredient.toString();
             ingredients.add(str_ingredient.substring(1, str_ingredient.length() - 1));
@@ -130,97 +137,105 @@ public class RecipieController {
 
         //orderedList
         List<OrderedList> orderedLists = orderedListDao.getOrderedList(id);
-        ArrayNode arrayNode = objectNode.withArray("steps");
-        List<OrderedList> new_orderedLists = new LinkedList<>();
-        //updated former_orderList.size() >= updated_orderList.size()
-        if (orderedLists.size() >= arrayNode.size()) {
-            int i = 0;
-            while ( i < orderedLists.size()) {
-                if(i < arrayNode.size()){
-                    JsonNode jsonNode = arrayNode.get(i);
-                    boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
-                    if (!isPositionMatch) {
-                        JSONObject jObject = new JSONObject();
-                        jObject.put("message", "the format of position is wrong, should be integer");
-                        return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(jObject.toString());
+        try {
+            ArrayNode arrayNode = objectNode.withArray("steps");
+            List<OrderedList> new_orderedLists = new LinkedList<>();
+            //updated former_orderList.size() >= updated_orderList.size()
+            if (orderedLists.size() >= arrayNode.size()) {
+                int i = 0;
+                while ( i < orderedLists.size()) {
+                    if(i < arrayNode.size()){
+                        JsonNode jsonNode = arrayNode.get(i);
+                        boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
+                        if (!isPositionMatch) {
+                            JSONObject jObject = new JSONObject();
+                            jObject.put("message", "the format of position is wrong, should be integer");
+                            return ResponseEntity
+                                    .status(HttpStatus.BAD_REQUEST)
+                                    .body(jObject.toString());
+                        }
+                        int position = jsonNode.get("position").asInt();
+                        if (position < 1) {
+                            JSONObject jObject = new JSONObject();
+                            jObject.put("message", "the value of position has to be larger than 1");
+                            return ResponseEntity
+                                    .status(HttpStatus.BAD_REQUEST)
+                                    .body(jObject.toString());
+                        }
+                        orderedLists.get(i).setPosition(position);
+                        orderedLists.get(i).setItems(jsonNode.get("items").asText());
+                        orderedListDao.update(orderedLists.get(i));
+                    }else {
+                        orderedListDao.delete(orderedLists.get(i));
                     }
-                    int position = jsonNode.get("position").asInt();
-                    if (position < 1) {
-                        JSONObject jObject = new JSONObject();
-                        jObject.put("message", "the value of position has to be larger than 1");
-                        return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(jObject.toString());
-                    }
-                    orderedLists.get(i).setPosition(position);
-                    orderedLists.get(i).setItems(jsonNode.get("items").asText());
-                    orderedListDao.update(orderedLists.get(i));
-                }else {
-                    orderedListDao.delete(orderedLists.get(i));
+                    i++;
                 }
-                i++;
-            }
-        } else {
-            int i =0;
-            while (i < arrayNode.size()){
-                if (i < orderedLists.size()) {
-                    JsonNode jsonNode = arrayNode.get(i);
-                    boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
-                    if (!isPositionMatch) {
-                        JSONObject jObject = new JSONObject();
-                        jObject.put("message", "the format of position is wrong, should be integer");
-                        return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(jObject.toString());
+            } else {
+                int i =0;
+                while (i < arrayNode.size()){
+                    if (i < orderedLists.size()) {
+                        JsonNode jsonNode = arrayNode.get(i);
+                        boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
+                        if (!isPositionMatch) {
+                            JSONObject jObject = new JSONObject();
+                            jObject.put("message", "the format of position is wrong, should be integer");
+                            return ResponseEntity
+                                    .status(HttpStatus.BAD_REQUEST)
+                                    .body(jObject.toString());
+                        }
+                        int position = jsonNode.get("position").asInt();
+                        if (position < 1) {
+                            JSONObject jObject = new JSONObject();
+                            jObject.put("message", "the value of position has to be larger than 1");
+                            return ResponseEntity
+                                    .status(HttpStatus.BAD_REQUEST)
+                                    .body(jObject.toString());
+                        }
+                        orderedLists.get(i).setPosition(position);
+                        orderedLists.get(i).setItems(jsonNode.get("items").asText());
+                        orderedListDao.update(orderedLists.get(i));
+                    } else {
+                        OrderedList orderedList = new OrderedList();
+                        boolean isPositionMatch = inputIntegerCheck(arrayNode.get(i).get("position").asText());
+                        if (!isPositionMatch) {
+                            JSONObject jObject = new JSONObject();
+                            jObject.put("message", "the format of position is wrong, should be integer");
+                            return ResponseEntity
+                                    .status(HttpStatus.BAD_REQUEST)
+                                    .body(jObject.toString());
+                        }
+                        int position = arrayNode.get(i).get("position").asInt();
+                        if (position < 1) {
+                            JSONObject jObject = new JSONObject();
+                            jObject.put("message", "the value of position has to be larger than 1");
+                            return ResponseEntity
+                                    .status(HttpStatus.BAD_REQUEST)
+                                    .body(jObject.toString());
+                        }
+                        orderedList.setPosition(position);
+                        orderedList.setItems(arrayNode.get(i).get("items").asText());
+                        orderedList.setRecipie(recipie_updated);
+                        new_orderedLists.add(orderedList);
                     }
-                    int position = jsonNode.get("position").asInt();
-                    if (position < 1) {
-                        JSONObject jObject = new JSONObject();
-                        jObject.put("message", "the value of position has to be larger than 1");
-                        return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(jObject.toString());
-                    }
-                    orderedLists.get(i).setPosition(position);
-                    orderedLists.get(i).setItems(jsonNode.get("items").asText());
-                    orderedListDao.update(orderedLists.get(i));
-                } else {
-                    OrderedList orderedList = new OrderedList();
-                    boolean isPositionMatch = inputIntegerCheck(arrayNode.get(i).get("position").asText());
-                    if (!isPositionMatch) {
-                        JSONObject jObject = new JSONObject();
-                        jObject.put("message", "the format of position is wrong, should be integer");
-                        return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(jObject.toString());
-                    }
-                    int position = arrayNode.get(i).get("position").asInt();
-                    if (position < 1) {
-                        JSONObject jObject = new JSONObject();
-                        jObject.put("message", "the value of position has to be larger than 1");
-                        return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(jObject.toString());
-                    }
-                    orderedList.setPosition(position);
-                    orderedList.setItems(arrayNode.get(i).get("items").asText());
-                    orderedList.setRecipie(recipie_updated);
-                    new_orderedLists.add(orderedList);
+                    i++;
                 }
-                i++;
+                if(new_orderedLists.size() > 0){
+                    recipie_updated.setSteps(new_orderedLists);
+                }
             }
-            if(new_orderedLists.size() > 0){
-                recipie_updated.setSteps(new_orderedLists);
+            //        recipieDao.update(recipie_updated);
+            if (new_orderedLists.size() > 0){
+                for(OrderedList ol : new_orderedLists){
+                    ol.setRecipie(recipie_updated);
+                    orderedListDao.save(ol);
+                }
             }
-        }
-//        recipieDao.update(recipie_updated);
-        if (new_orderedLists.size() > 0){
-            for(OrderedList ol : new_orderedLists){
-                ol.setRecipie(recipie_updated);
-                orderedListDao.save(ol);
-            }
+        } catch (Exception e){
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the format of steps is wrong, should be array");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
         }
         //NutritionInforamtion update
         NutritionInformation nuInfo = nutritionInformationDao.get(id);
@@ -339,6 +354,13 @@ public class RecipieController {
         //set ingredients
         List<String> ingredientsList = new ArrayList<>();
         JsonNode str = objectNode.get("ingredients");
+        if(!str.isArray()) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the value of ingredients should be an array");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
         for(JsonNode ingredient : str){
             String str_ingredient = ingredient.toString();
             ingredientsList.add(str_ingredient.substring(1, str_ingredient.length() - 1));
@@ -353,30 +375,37 @@ public class RecipieController {
 
         // set Steps
         List<OrderedList> orderedLists = new LinkedList<>();
-        ArrayNode arrayNode = objectNode.withArray("steps");
-
-        for(JsonNode jsonNode : arrayNode){
-            OrderedList orderedList = new OrderedList();
-            boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
-            if (!isPositionMatch) {
-                JSONObject jObject = new JSONObject();
-                jObject.put("message", "the format of position is wrong, should be integer");
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(jObject.toString());
+        try{
+            ArrayNode arrayNode = objectNode.withArray("steps");
+            for(JsonNode jsonNode : arrayNode){
+                OrderedList orderedList = new OrderedList();
+                boolean isPositionMatch = inputIntegerCheck(jsonNode.get("position").asText());
+                if (!isPositionMatch) {
+                    JSONObject jObject = new JSONObject();
+                    jObject.put("message", "the format of position is wrong, should be integer");
+                    return ResponseEntity
+                            .status(HttpStatus.BAD_REQUEST)
+                            .body(jObject.toString());
+                }
+                int position = jsonNode.get("position").asInt();
+                if (position < 1) {
+                    JSONObject jObject = new JSONObject();
+                    jObject.put("message", "the value of position has to be larger than 1");
+                    return ResponseEntity
+                            .status(HttpStatus.BAD_REQUEST)
+                            .body(jObject.toString());
+                }
+                orderedList.setPosition(position);
+                orderedList.setItems(jsonNode.get("items").asText());
+                orderedList.setRecipie(recipie);
+                orderedLists.add(orderedList);
             }
-            int position = jsonNode.get("position").asInt();
-            if (position < 1) {
-                JSONObject jObject = new JSONObject();
-                jObject.put("message", "the value of position has to be larger than 1");
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(jObject.toString());
-            }
-            orderedList.setPosition(position);
-            orderedList.setItems(jsonNode.get("items").asText());
-            orderedList.setRecipie(recipie);
-            orderedLists.add(orderedList);
+        }catch (Exception e){
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "the format of steps is wrong, should be array");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
         }
         recipie.setSteps(orderedLists);
 
@@ -517,7 +546,7 @@ public class RecipieController {
         jObject.put("ingredients", new JSONArray(recipie.getIngredients()));
 
         JSONArray steps = new JSONArray();
-        for (OrderedList ol : recipie.getSteps()) {
+        for (OrderedList ol : orderedListDao.getOrderedList(recipie.getId())) {
             JSONObject orderedList = new JSONObject();
             orderedList.put("position", ol.getPosition());
             orderedList.put("items", ol.getItems());
@@ -537,12 +566,12 @@ public class RecipieController {
         return jObject;
     }
 
-    private boolean inputIntegerCheck(String input) {
+    public boolean inputIntegerCheck(String input) {
         String intPattern = "^[1-9]\\d*$";
         return Pattern.matches(intPattern, input);
     }
 
-    private boolean inputFloatCheck(String input) {
+    public boolean inputFloatCheck(String input) {
         String floatPattern = "^([1-9]*[1-9][0-9]*(\\.[0-9]+)?|[0]+\\.[0-9]*[1-9][0-9]*)$";
         return Pattern.matches(floatPattern, input);
     }

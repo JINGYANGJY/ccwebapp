@@ -101,3 +101,19 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#compile
+*/.idea/
+.idea/
+
+#output
+out/
+
+# Java class files
+*.class
+
+# Generated files
+*/bin/
+*/gen/
+*/out/
+

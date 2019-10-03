@@ -7,9 +7,13 @@
     <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/csye6225</property>
     <property name="hibernate.connection.password">root123</property>
     <property name="hibernate.connection.username">root</property>
-    <property name="hibernate.hbm2ddl.auto">update</property>
+    <property name="hibernate.hbm2ddl.auto">create</property>
     <property name="hibernate.show_sql">true</property>
-    <mapping class="DAO.UserDao"></mapping>
-    <mapping resource="/POJO/User.hbm.xml"/>
+
+    <mapping class="POJO.User"/>
+    <mapping class="POJO.Recipie"/>
+    <mapping class="POJO.NutritionInformation"/>
+    <mapping class="POJO.OrderedList"/>
+
   </session-factory>
 </hibernate-configuration>

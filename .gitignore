@@ -116,4 +116,6 @@ out/
 */bin/
 */gen/
 */out/
-
+*.tfstate
+*.backup
+**/.terraform/

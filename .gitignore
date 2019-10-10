@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+build/*
 develop-eggs/
 dist/
 downloads/
@@ -111,6 +112,8 @@ out/
 
 # Java class files
 *.class
+*.jar
+*.war
 
 # Generated files
 */bin/

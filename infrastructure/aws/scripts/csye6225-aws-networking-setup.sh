@@ -16,33 +16,29 @@ echo $aws_response
 # Show availability zones
 aws ec2 describe-availability-zones
 
-create_subnet () {
-  echo "Enter availability-zone and press [ENTER]: "
-  read availabilityZone
-  echo "Enter sub-net-cidr-block and press [ENTER]: "
-  read subNetCidrBlock
-  aws ec2 create-subnet \
-    --cidr-block "$subNetCidrBlock" \
-    --availability-zone "$availabilityZone" \
-    --vpc-id "$vpcId" \
-    --output json
-}
-
 
 echo "Create first subnet"
-create_subnet
-
-SubnetA=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId} --query [Subnets[0].SubnetId] --output text)
+echo "Enter availability-zone and press [ENTER]: "
+read availabilityZoneA
+echo "Enter sub-net-cidr-block and press [ENTER]: "
+read subNetCidrBlockA
+SubnetA=$(aws ec2 create-subnet --availability-zone $availabilityZoneA --vpc-id $vpcId --cidr-block $subNetCidrBlockA --query [Subnet.SubnetId] --output text)
 
 echo "Create second subnet"
-create_subnet
+echo "Enter availability-zone and press [ENTER]: "
+read availabilityZoneB
+echo "Enter sub-net-cidr-block and press [ENTER]: "
+read subNetCidrBlockB
+SubnetB=$(aws ec2 create-subnet --availability-zone $availabilityZoneB --vpc-id $vpcId --cidr-block $subNetCidrBlockB --query [Subnet.SubnetId] --output text)
 
-SubnetB=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId}  --query [Subnets[1].SubnetId] --output text)
 
 echo "Create third subnet"
-create_subnet
+echo "Enter availability-zone and press [ENTER]: "
+read availabilityZoneC
+echo "Enter sub-net-cidr-block and press [ENTER]: "
+read subNetCidrBlockC
+SubnetC=$(aws ec2 create-subnet --availability-zone $availabilityZoneC --vpc-id $vpcId --cidr-block $subNetCidrBlockC --query [Subnet.SubnetId] --output text)
 
-SubnetC=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId}  --query [Subnets[2].SubnetId] --output text)
 
 
 echo "Creating internet-gateway ..."

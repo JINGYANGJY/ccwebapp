@@ -1,57 +1,42 @@
-# sh #!/bin/bash
-# # delete-aws-vpc
+echo "Enter VPC name:"
+read VPC_NAME
 
-# aws ec2 describe-vpcs
+#Get a vpc-Id using the name provided
+vpcId=`aws ec2 describe-vpcs --filter "Name=tag:Name,Values=$VPC_NAME" --query 'Vpcs[*].{id:VpcId}' --output text`
+#Get a Internet Gateway Id using the name provided
+gatewayId=`aws ec2 describe-internet-gateways --filter "Name=tag:Name,Values=$VPC_NAME-ig" --query 'InternetGateways[*].{id:InternetGatewayId}' --output text`
+#Get a route table Id using the name provided
+routeTableId=`aws ec2 describe-route-tables --filter "Name=tag:Name,Values=$VPC_NAME-rt" --query 'RouteTables[*].{id:RouteTableId}' --output text`
+#Get a Subnet Id using the name provided
+publicSubnetId=`aws ec2 describe-subnets --filter "Name=tag:Name,Values=$VPC_NAME-subnet1" --query 'Subnets[*].{id:SubnetId}' --output text`
+publicSubnetId1=`aws ec2 describe-subnets --filter "Name=tag:Name,Values=$VPC_NAME-subnet2" --query 'Subnets[*].{id:SubnetId}' --output text`
+publicSubnetId2=`aws ec2 describe-subnets --filter "Name=tag:Name,Values=$VPC_NAME-subnet3" --query 'Subnets[*].{id:SubnetId}' --output text`
 
-echo "Enter your vpc-id and press [ENTER]: "
-read vpcId
+#Delete all subnets from the vpc
+aws ec2 delete-subnet --subnet-id $publicSubnetId
+aws ec2 delete-subnet --subnet-id $publicSubnetId1
+aws ec2 delete-subnet --subnet-id $publicSubnetId2
+echo "Delete all subnets from the vpc "$vpcId
 
-subnet1_id=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId} --query [Subnets[0].SubnetId] --output text)
-subnet2_id=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId}  --query [Subnets[1].SubnetId] --output text)
-subnet3_id=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId}  --query [Subnets[2].SubnetId] --output text)
+#Delete the route
+aws ec2 delete-route --route-table-id $routeTableId --destination-cidr-block 0.0.0.0/0
+#aws ec2 delete-route --route-table-id $routeTableId --destination-cidr-block 10.0.0.0/16
+echo "Deleting the route from route table"
 
+#Delete the route table
+aws ec2 delete-route-table --route-table-id $routeTableId
+echo "Deleting the route table with id: "$routeTableId
 
-if [ -z $subnet1_id ]; then
-	echo 'Error fetching SUBNET 1 ID' $subnet1_id
-	if [ -z $subnet2_id ]; then
-		echo 'Error fetching SUBNET 2 ID' $subnet2_id
-		if [ -z $subnet3_id ]; then
-			echo 'Error fetching SUBNET 3 ID' $subnet3_id
-		fi
-	fi
-else
-	aws ec2 delete-subnet --subnet-id $subnet1_id
-	echo 'DELETED SUBNET 1' $subnet1_id
-	aws ec2 delete-subnet --subnet-id $subnet2_id
-	echo 'DELETED SUBNET 2' $subnet1_id
-	aws ec2 delete-subnet --subnet-id $subnet3_id
-	echo 'DELETED SUBNET 3' $subnet1_id
-	echo 'ALL 3 E SUBNETS DELETED SUCCESSULLY'
+#Detach Internet gateway and vpc
+aws ec2 detach-internet-gateway --internet-gateway-id $gatewayId --vpc-id $vpcId
+echo "Detaching the Internet gateway from vpc"
 
+#Delete the Internet gateway
+aws ec2 delete-internet-gateway --internet-gateway-id $gatewayId
+echo "Deleting the Internet gateway: "$gatewayId
 
-route_table_id=$(aws ec2 describe-route-tables --filters Name=vpc-id,Values=${vpcId} --query [RouteTables[0].RouteTableId] --output text)
-	if [ -z $route_table_id ]; then
-		echo 'Error fetching ROUTE TABLE ID' $route_table_id    
-	else
-		aws ec2 delete-route --route-table-id $route_table_id --destination-cidr-block 0.0.0.0/0
-		aws ec2 delete-route-table --route-table-id $route_table_id
-    		echo 'DELETED ROUTE TABLE' $route_table_id	
-	fi
+#Delete the vpc
+aws ec2 delete-vpc --vpc-id $vpcId
+echo "Deleting vpc "$vpcId
 
-vpc_id=$(aws ec2 describe-vpcs --filters Name=vpc-id,Values=${vpcId} --query [Vpcs[0].VpcId] --output text)
-	if [ -z $vpc_id ]; then
-		echo 'Error fetching VPC ID' $vpc_id
-	else
-		ig_id=$(aws ec2 describe-internet-gateways --filters Name=attachment.vpc-id,Values=${vpcId} --query [InternetGateways[0].InternetGatewayId] --output text)
-		if [ -z $ig_id ]; then
-		        echo 'Error fetching Internet Gateway ID' $ig_id
-		else
-			aws ec2 detach-internet-gateway --internet-gateway-id $ig_id --vpc-id $vpc_id
-			aws ec2 delete-internet-gateway --internet-gateway-id $ig_id
-			echo 'DELETED INTERNET GATEWAY' $ig_id
-		fi		
-		aws ec2 delete-vpc --vpc-id $vpc_id
-		echo 'DELETED VPC' $vpc_id
-	fi
-		echo 'COMPLETED STACK TERMINATION.'
-fi
+echo "Deletion Completed"

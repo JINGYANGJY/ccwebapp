@@ -25,9 +25,7 @@ read availabilityZoneA
 echo "Enter sub-net-cidr-block and press [ENTER]: "
 read subNetCidrBlockA
 SubnetA=$(aws ec2 create-subnet --availability-zone $availabilityZoneA --vpc-id $vpcId --cidr-block $subNetCidrBlockA --query [Subnet.SubnetId] --output text)
-echo "Enter subnet1-name and press [ENTER]: "
-read subnet1Name
-aws ec2 create-tags --resources $SubnetA --tags Key=Name,Value="$subnet1Name"
+aws ec2 create-tags --resources $SubnetA --tags Key=Name,Value="$vpcName-subnet1"
 
 echo "Create second subnet"
 echo "Enter availability-zone and press [ENTER]: "
@@ -35,9 +33,7 @@ read availabilityZoneB
 echo "Enter sub-net-cidr-block and press [ENTER]: "
 read subNetCidrBlockB
 SubnetB=$(aws ec2 create-subnet --availability-zone $availabilityZoneB --vpc-id $vpcId --cidr-block $subNetCidrBlockB --query [Subnet.SubnetId] --output text)
-echo "Enter subnet2-name and press [ENTER]: "
-read subnet2Name
-aws ec2 create-tags --resources $SubnetB --tags Key=Name,Value="$subnet2Name"
+aws ec2 create-tags --resources $SubnetB --tags Key=Name,Value="$vpcName-subnet2"
 
 echo "Create third subnet"
 echo "Enter availability-zone and press [ENTER]: "
@@ -45,24 +41,18 @@ read availabilityZoneC
 echo "Enter sub-net-cidr-block and press [ENTER]: "
 read subNetCidrBlockC
 SubnetC=$(aws ec2 create-subnet --availability-zone $availabilityZoneC --vpc-id $vpcId --cidr-block $subNetCidrBlockC --query [Subnet.SubnetId] --output text)
-echo "Enter subnet3-name and press [ENTER]: "
-read subnet3Name
-aws ec2 create-tags --resources $SubnetC --tags Key=Name,Value="$subnet3Name"
+aws ec2 create-tags --resources $SubnetC --tags Key=Name,Value="$vpcName-subnet3"
 
 
 echo "Creating internet-gateway ..."
 internetGatewayId=$(aws ec2 create-internet-gateway --query [InternetGateway.InternetGatewayId] --output text)
-echo "Enter internet-gateway-name and press [ENTER]: "
-read igName
-aws ec2 create-tags --resources $internetGatewayId --tags Key=Name,Value="$igName"
+aws ec2 create-tags --resources $internetGatewayId --tags Key=Name,Value="$vpcName-ig"
 
 aws ec2 attach-internet-gateway --vpc-id $vpcId --internet-gateway-id $internetGatewayId
 
 echo "Creating route-table ..."
 routeTableId=$(aws ec2 create-route-table --vpc-id $vpcId --query [RouteTable.RouteTableId] --output text)
-echo "Enter route-table-name and press [ENTER]: "
-read rtName
-aws ec2 create-tags --resources $routeTableId --tags Key=Name,Value="$rtName"
+aws ec2 create-tags --resources $routeTableId --tags Key=Name,Value="$vpcName-rt"
 
 aws ec2 create-route --route-table-id $routeTableId --destination-cidr-block 0.0.0.0/0 --gateway-id $internetGatewayId
 

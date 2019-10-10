@@ -5,14 +5,12 @@ echo "Enter vpc-cidr-block and press [ENTER]: "
 read vpcCidrBlock
 
 echo "Creating VPC..."
-# create vpc with cidr block /16
-aws_response=$(aws ec2 create-vpc \
- --cidr-block "$vpcCidrBlock" \
- --output json)
+
+vpcId=$(aws ec2 create-vpc --cidr-block "$vpcCidrBlock" --query [Vpc.VpcId] --output text)
+echo $vpcId
+aws_response=$(aws ec2 describe-vpcs --filters Name=vpc-id,Values=${vpcId}  --output json)
 echo $aws_response
 
-echo "Enter the vpc-id shown above to store it and press [ENTER]: "
-read vpcID
 
 # create subnet for vpc
 # Show availability zones
@@ -26,7 +24,7 @@ create_subnet () {
   aws ec2 create-subnet \
     --cidr-block "$subNetCidrBlock" \
     --availability-zone "$availabilityZone" \
-    --vpc-id "$vpcID" \
+    --vpc-id "$vpcId" \
     --output json
 }
 
@@ -34,33 +32,28 @@ create_subnet () {
 echo "Create first subnet"
 create_subnet
 
-echo "Enter the subnet-id shown above to store it and press [ENTER]: "
-read SubnetA
+SubnetA=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId} --query [Subnets[0].SubnetId] --output text)
 
 echo "Create second subnet"
 create_subnet
 
-echo "Enter the subnet-id shown above to store it and press [ENTER]: "
-read SubnetB
+SubnetB=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId}  --query [Subnets[1].SubnetId] --output text)
 
 echo "Create third subnet"
 create_subnet
 
-echo "Enter the subnet-id shown above to store it and press [ENTER]: "
-read SubnetC
+SubnetC=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=${vpcId}  --query [Subnets[2].SubnetId] --output text)
 
 
 echo "Creating internet-gateway ..."
 aws ec2 create-internet-gateway
-echo "Enter the gateway-id shown above to store it and press [ENTER]: "
-read internetGatewayId
+internetGatewayId=$(aws ec2 create-internet-gateway --query [InternetGateway.InternetGatewayId] --output text)
 
-aws ec2 attach-internet-gateway --vpc-id $vpcID --internet-gateway-id $internetGatewayId
+
+aws ec2 attach-internet-gateway --vpc-id $vpcId --internet-gateway-id $internetGatewayId
 
 echo "Creating route-table ..."
-aws ec2 create-route-table --vpc-id $vpcID
-echo "Enter the RouteTableId shown above to store it and press [ENTER]: "
-read routeTableId
+routeTableId=$(aws ec2 create-route-table --vpc-id $vpcId --query [RouteTable.RouteTableId] --output text)
 
 aws ec2 create-route --route-table-id $routeTableId --destination-cidr-block 0.0.0.0/0 --gateway-id $internetGatewayId
 

@@ -29,5 +29,5 @@ terraform apply -var-file="xxx.tfvars"
 ```
 * From your terminal, destroy the resources
 ```console
-terraform destroy
+terraform destroy -var-file="xxx.tfvars"
 ```

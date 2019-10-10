@@ -1,6 +1,11 @@
 provider "aws" {
-  profile = "dev"
+  profile = var.profile
   region  = var.vpc_region
+}
+
+variable "profile" {
+  type = "string"
+  default = "dev"
 }
 
 variable "vpc_region" {
@@ -82,7 +87,6 @@ resource "aws_vpc" "myvpc" {
   cidr_block = var.cidr_block
   enable_dns_hostnames = true
   enable_dns_support   = true
-  enable_classiclink_dns_support = true
   assign_generated_ipv6_cidr_block = false
   instance_tenancy = "default"
   tags = {

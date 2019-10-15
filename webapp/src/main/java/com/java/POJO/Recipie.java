@@ -1,9 +1,8 @@
-package POJO;
-
-import java.util.ArrayList;
-import java.util.List;
+package com.java.POJO;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="recipie")
@@ -11,29 +10,27 @@ public class Recipie {
 
 
     @Id
-//    @GeneratedValue(generator = "generator")
-//    @GenericGenerator(name="generator",strategy = "uuid2")
     @Column(name="id")
     private String id;
-    @Column (name = "created_ts")
+    @Column(name = "created_ts")
     private String createdTs;
-    @Column (name = "updated_ts")
+    @Column(name = "updated_ts")
     private String updatedTs;
 
-    @Column (name = "author_id")
+    @Column(name = "author_id")
     private String authorId;
 
-    @Column (name = "cook_time_in_min")
+    @Column(name = "cook_time_in_min")
     private int cookTimeInMin;
-    @Column (name ="prep_time_in_min")
+    @Column(name ="prep_time_in_min")
     private int prepTimeInMin;
-    @Column (name ="total_time_in_min")
+    @Column(name ="total_time_in_min")
     private int totalTimeInMin;
-    @Column (name ="title")
+    @Column(name ="title")
     private String title;
-    @Column (name = "cusine")
+    @Column(name = "cusine")
     private String cusine;
-    @Column (name = "servings")
+    @Column(name = "servings")
     private int servings;
 
     @ElementCollection
@@ -41,14 +38,8 @@ public class Recipie {
     @Column(name="ingredient")
     private List<String> ingredients = new ArrayList<>();
 
-    @OneToMany(mappedBy = "recipie",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "recipie",fetch =FetchType.EAGER ,cascade = CascadeType.REMOVE)
     private List<OrderedList> steps = new ArrayList<>();
-
-    @OneToOne(mappedBy = "recipie",cascade=CascadeType.ALL)
-    private NutritionInformation nutritionInformation;
-
-
-
 
     public Recipie() {
     }
@@ -149,11 +140,4 @@ public class Recipie {
         this.steps = steps;
     }
 
-    public NutritionInformation getNutritionInformation() {
-        return nutritionInformation;
-    }
-
-    public void setNutritionInformation(NutritionInformation nutritionInformation) {
-        this.nutritionInformation = nutritionInformation;
-    }
 }

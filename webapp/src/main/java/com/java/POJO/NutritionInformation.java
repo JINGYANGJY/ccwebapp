@@ -1,7 +1,8 @@
-package POJO;
+package com.java.POJO;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+
 import javax.persistence.*;
 
 @Entity
@@ -10,10 +11,7 @@ import javax.persistence.*;
 public class NutritionInformation {
 
     @Id
-    @GenericGenerator(name = "generator", strategy = "foreign",
-            parameters = @Parameter(name = "property", value = "recipie"))
-    @GeneratedValue(generator = "generator")
-    @Column(name ="id")
+    @Column(name="id")
     private String id;
     @Column(name="calories")
     private int calories;
@@ -26,9 +24,8 @@ public class NutritionInformation {
     @Column(name ="protein_in_grams")
     private double proteinInGrams;
 
-    @OneToOne
-    @PrimaryKeyJoinColumn
-    private  Recipie recipie;
+    public NutritionInformation() {
+    }
 
     public int getCalories() {
         return calories;
@@ -72,14 +69,6 @@ public class NutritionInformation {
 
     public String getId() {
         return id;
-    }
-
-    public Recipie getRecipie() {
-        return recipie;
-    }
-
-    public void setRecipie(Recipie recipie) {
-        this.recipie = recipie;
     }
 
     public void setId(String id) {

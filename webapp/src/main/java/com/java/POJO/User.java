@@ -1,7 +1,4 @@
-package POJO;
-
-
-import org.springframework.stereotype.Component;
+package com.java.POJO;
 
 import javax.persistence.*;
 
@@ -91,3 +88,4 @@ public class User {
         this.accountUpdate = accountUpdate;
     }
 }
+

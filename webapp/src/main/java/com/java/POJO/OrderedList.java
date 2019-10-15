@@ -1,6 +1,7 @@
-package POJO;
+package com.java.POJO;
 
 import javax.persistence.*;
+
 @Entity
 @Table(name="orderedList")
 public class OrderedList {

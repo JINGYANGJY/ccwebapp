@@ -1,26 +1,25 @@
-package Test;
+package com.java;
 
-import Controller.RecipieController;
-import Controller.UserController;
+import com.java.Controller.RecipieController;
+import com.java.Controller.UserController;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-public class UserControllerTest {
-    UserController userController;
-    RecipieController recipieController;
-    String password;
-    String nonStrongpassword;
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class JavaApplicationTests {
+    UserController userController = new UserController();;
+    RecipieController recipieController = new RecipieController();
+    String password ="Yang!123";
+    String nonStrongpassword="123";
 
-    @Before
-    public  void initial(){
-        userController = new UserController();
-        recipieController = new RecipieController();
-        password ="Yang!123";
-        nonStrongpassword="123";
+    @Test
+    public void contextLoads() {
     }
-
 
     @Test
     public void checkPassword() {
@@ -57,4 +56,5 @@ public class UserControllerTest {
     public void nonInputFloatCheck() {
         Assert.assertFalse(recipieController.inputFloatCheck("abc"));
     }
+
 }

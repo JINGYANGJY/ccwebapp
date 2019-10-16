@@ -104,8 +104,10 @@ venv.bak/
 .mypy_cache/
 
 #compile
-*/.idea/
+
+
 .idea/
+
 
 #output
 out/

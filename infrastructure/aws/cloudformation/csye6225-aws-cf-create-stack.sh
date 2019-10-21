@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+IPV4REGEX="^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?)(\/([0-9]|[1-2][0-9]|3[0-2]))$"
+
 echo "Enter your stack name [ENTER]: "
 read stack
 
@@ -27,12 +30,17 @@ read subNetCidrBlockC
 echo "Enter DestinationCidrBlock and press [ENTER]: "
 read DestinationCidrBlock
 
+if [[ "$vpcCidrBlock" =~ $IPV4REGEX ]] && [[ "$subNetCidrBlockA" =~ $IPV4REGEX ]] && [[ "$subNetCidrBlockB" =~ $IPV4REGEX ]] && [[ "$subNetCidrBlockC" =~ $IPV4REGEX ]]
 
-stackId=$(aws cloudformation create-stack --stack-name ${stack} --template-body file://csye6225-cf-networking.json --parameters ParameterKey=vpcCidrBlock,ParameterValue=$vpcCidrBlock ParameterKey=availabilityZoneA,ParameterValue=$availabilityZoneA ParameterKey=subNetCidrBlockA,ParameterValue=$subNetCidrBlockA ParameterKey=availabilityZoneB,ParameterValue=$availabilityZoneB ParameterKey=subNetCidrBlockB,ParameterValue=$subNetCidrBlockB ParameterKey=availabilityZoneC,ParameterValue=$availabilityZoneC ParameterKey=subNetCidrBlockC,ParameterValue=$subNetCidrBlockC ParameterKey=DestinationCidrBlock,ParameterValue=$DestinationCidrBlock --query [StackId] --output text)
+then 
 
-if [ -z $stackId ]; then
-    echo ' fail: stack was not created created!'
+  echo "Start"
+StackStatusReason=$(aws cloudformation create-stack --stack-name ${stack} --template-body file://csye6225-cf-networking.json --parameters ParameterKey=vpcCidrBlock,ParameterValue=$vpcCidrBlock ParameterKey=availabilityZoneA,ParameterValue=$availabilityZoneA ParameterKey=subNetCidrBlockA,ParameterValue=$subNetCidrBlockA ParameterKey=availabilityZoneB,ParameterValue=$availabilityZoneB ParameterKey=subNetCidrBlockB,ParameterValue=$subNetCidrBlockB ParameterKey=availabilityZoneC,ParameterValue=$availabilityZoneC ParameterKey=subNetCidrBlockC,ParameterValue=$subNetCidrBlockC ParameterKey=DestinationCidrBlock,ParameterValue=$DestinationCidrBlock --output json)
+
 else
-    aws cloudformation wait stack-create-complete --stack-name $stackId
-    echo "success: Stack was created created!"
+
+  echo "Invalid Input"
+
+  exit 0
+
 fi

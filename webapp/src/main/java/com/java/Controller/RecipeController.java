@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.java.DAO.NutritionInformationRepository;
 import com.java.DAO.OrderedListRepository;
-import com.java.DAO.RecipieRepository;
+import com.java.DAO.RecipeRepository;
 import com.java.DAO.UserRepository;
 import com.java.POJO.NutritionInformation;
 import com.java.POJO.OrderedList;
-import com.java.POJO.Recipie;
+import com.java.POJO.Recipe;
 import com.java.POJO.User;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,21 +27,21 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @Controller
-public class RecipieController {
+public class RecipeController {
     @Autowired
     UserRepository userRepository;
     @Autowired
-    RecipieRepository recipieRepository;
+    RecipeRepository recipeRepository;
     @Autowired
     NutritionInformationRepository nutritionInformationRepository;
     @Autowired
     OrderedListRepository orderedListRepository;
 
 
-    @RequestMapping(value = "/v1/recipie/{id}", method = RequestMethod.PUT, consumes = "application/json")
+    @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody
     ResponseEntity<String>
-    updateRecipie(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode, @PathVariable("id") String id) {
+    updateRecipe(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode, @PathVariable("id") String id) {
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
@@ -54,19 +54,19 @@ public class RecipieController {
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
-        //find recipie which need to be updated
-        Recipie recipie_updated = recipieRepository.findRecipieById(id);
+        //find recipe which need to be updated
+        Recipe recipe_updated = recipeRepository.findRecipeById(id);
 
-        if (recipie_updated == null) {
+        if (recipe_updated == null) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "Recipie with id " + id + " does not exist");
+            jObject.put("message", "Recipe with id " + id + " does not exist");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
         }
-        if (!user.getId().equals(recipie_updated.getAuthorId())) {
+        if (!user.getId().equals(recipe_updated.getAuthorId())) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "you're not authorized to update this recipie");
+            jObject.put("message", "you're not authorized to update this recipe");
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
@@ -100,12 +100,12 @@ public class RecipieController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-        recipie_updated.setCookTimeInMin(cook_time);
-        recipie_updated.setPrepTimeInMin(prep_time);
-        recipie_updated.setTotalTimeInMin(cook_time + prep_time);
+        recipe_updated.setCookTimeInMin(cook_time);
+        recipe_updated.setPrepTimeInMin(prep_time);
+        recipe_updated.setTotalTimeInMin(cook_time + prep_time);
 
-        recipie_updated.setTitle(objectNode.get("title").asText());
-        recipie_updated.setCusine(objectNode.get("cusine").asText());
+        recipe_updated.setTitle(objectNode.get("title").asText());
+        recipe_updated.setCusine(objectNode.get("cusine").asText());
 
         int servings = objectNode.get("servings").asInt();
         if (servings < 1 || servings > 5) {
@@ -115,12 +115,12 @@ public class RecipieController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-        recipie_updated.setServings(servings);
+        recipe_updated.setServings(servings);
 
         //set updated Time
         Date dNow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        recipie_updated.setUpdatedTs(ft.format(dNow));
+        recipe_updated.setUpdatedTs(ft.format(dNow));
 
         //update_ingredients
         List<String> ingredients = new ArrayList<>();
@@ -136,10 +136,10 @@ public class RecipieController {
             String str_ingredient = ingredient.toString();
             ingredients.add(str_ingredient.substring(1, str_ingredient.length() - 1));
         }
-        recipie_updated.setIngredients(ingredients);
+        recipe_updated.setIngredients(ingredients);
 
         //orderedList
-        List<OrderedList> orderedLists = recipie_updated.getSteps();
+        List<OrderedList> orderedLists = recipe_updated.getSteps();
         try {
             ArrayNode arrayNode = objectNode.withArray("steps");
             if (arrayNode.size() == 0) {
@@ -170,16 +170,16 @@ public class RecipieController {
                 }
                 order.setPosition(position);
                 order.setItems(node.get("items").asText());
-                order.setRecipie(recipie_updated);
+                order.setRecipe(recipe_updated);
                 new_orderedLists.add(order);
             }
 
-            for (OrderedList orderedLists1 : recipie_updated.getSteps()) {
+            for (OrderedList orderedLists1 : recipe_updated.getSteps()) {
                 orderedListRepository.delete(orderedLists1);
             }
 
 
-            recipie_updated.setSteps(new_orderedLists);
+            recipe_updated.setSteps(new_orderedLists);
             for (OrderedList order : new_orderedLists) {
                 orderedListRepository.save(order);
             }
@@ -232,14 +232,14 @@ public class RecipieController {
         }
         nuInfo.setId(id);
         nutritionInformationRepository.save(nuInfo);
-        JSONObject jObject = recipieParser(recipie_updated);
+        JSONObject jObject = recipeParser(recipe_updated);
         return ResponseEntity.status(HttpStatus.OK).
                 body(jObject.toString());
     }
 
-    @RequestMapping(value = "/v1/recipie/", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/v1/recipe/", method = RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
-    ResponseEntity<String> createRecipie(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode) {
+    ResponseEntity<String> createRecipe(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode) {
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
@@ -263,7 +263,7 @@ public class RecipieController {
                     .body(jObject.toString());
         }
 
-        Recipie recipie = new Recipie();
+        Recipe recipe = new Recipe();
 
         boolean isCookMatch = inputIntegerCheck(objectNode.get("cook_time_in_min").asText());
         boolean isPrepMatch = inputIntegerCheck(objectNode.get("prep_time_in_min").asText());
@@ -286,12 +286,12 @@ public class RecipieController {
                     .body(jObject.toString());
         }
 
-        recipie.setCookTimeInMin(cook_time);
-        recipie.setPrepTimeInMin(prep_time);
-        recipie.setTotalTimeInMin(cook_time + prep_time);
+        recipe.setCookTimeInMin(cook_time);
+        recipe.setPrepTimeInMin(prep_time);
+        recipe.setTotalTimeInMin(cook_time + prep_time);
 
-        recipie.setTitle(objectNode.get("title").asText());
-        recipie.setCusine(objectNode.get("cusine").asText());
+        recipe.setTitle(objectNode.get("title").asText());
+        recipe.setCusine(objectNode.get("cusine").asText());
 
         int servings = objectNode.get("servings").asInt();
         if (servings < 1 || servings > 5) {
@@ -301,12 +301,12 @@ public class RecipieController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-        recipie.setServings(servings);
+        recipe.setServings(servings);
 
-        recipie.setId(UUID.randomUUID().toString());
+        recipe.setId(UUID.randomUUID().toString());
         //set Author id
         String userId = user.getId();
-        recipie.setAuthorId(userId);
+        recipe.setAuthorId(userId);
 
         //set ingredients
         List<String> ingredientsList = new ArrayList<>();
@@ -322,13 +322,13 @@ public class RecipieController {
             String str_ingredient = ingredient.toString();
             ingredientsList.add(str_ingredient.substring(1, str_ingredient.length() - 1));
         }
-        recipie.setIngredients(ingredientsList);
+        recipe.setIngredients(ingredientsList);
 
         //set Time
         Date dNow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        recipie.setCreatedTs(ft.format(dNow));
-        recipie.setUpdatedTs(ft.format(dNow));
+        recipe.setCreatedTs(ft.format(dNow));
+        recipe.setUpdatedTs(ft.format(dNow));
 
         // set Steps
         List<OrderedList> orderedLists = new LinkedList<>();
@@ -361,7 +361,7 @@ public class RecipieController {
                 }
                 orderedList.setPosition(position);
                 orderedList.setItems(jsonNode.get("items").asText());
-                orderedList.setRecipie(recipie);
+                orderedList.setRecipe(recipe);
                 orderedLists.add(orderedList);
             }
         } catch (Exception e) {
@@ -371,7 +371,7 @@ public class RecipieController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-        recipie.setSteps(orderedLists);
+        recipe.setSteps(orderedLists);
 
         //setNutrition
         NutritionInformation nutritionInformation = new NutritionInformation();
@@ -412,15 +412,15 @@ public class RecipieController {
                     .body(jObject.toString());
         }
 
-        recipieRepository.save(recipie);
+        recipeRepository.save(recipe);
         for (OrderedList order : orderedLists) {
             orderedListRepository.save(order);
         }
-        nutritionInformation.setId(recipie.getId());
+        nutritionInformation.setId(recipe.getId());
         nutritionInformationRepository.save(nutritionInformation);
 
 
-        JSONObject jObject = recipieParser(recipie);
+        JSONObject jObject = recipeParser(recipe);
 
         return ResponseEntity.status(HttpStatus.CREATED).
                 body(jObject.toString());
@@ -436,9 +436,9 @@ public class RecipieController {
         }
     }
 
-    @RequestMapping(value = "/v1/recipie/*", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/v1/recipe/*", method = RequestMethod.DELETE)
     public @ResponseBody
-    ResponseEntity<String> deleteRecipie(@RequestHeader(value = "Authorization") String auth, HttpServletRequest request) {
+    ResponseEntity<String> deleteRecipe(@RequestHeader(value = "Authorization") String auth, HttpServletRequest request) {
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
@@ -446,12 +446,12 @@ public class RecipieController {
         String[] URI = request.getRequestURI().split("/");
         if (URI.length == 3) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "recipie id is required");
+            jObject.put("message", "recipe id is required");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
-        Recipie recipie = recipieRepository.findRecipieById(URI[3]);
+        Recipe recipe = recipeRepository.findRecipeById(URI[3]);
         User user = userRepository.findUserByEmail(email);
         if (!Authentication(user, password)) {
             JSONObject jObject = new JSONObject();
@@ -460,41 +460,41 @@ public class RecipieController {
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
-        if (recipie == null) {
+        if (recipe == null) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "Recipie with id " + URI[4] + " does not exist");
+            jObject.put("message", "Recipe with id " + URI[4] + " does not exist");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
         }
-        if (!user.getId().equals(recipie.getAuthorId())) {
+        if (!user.getId().equals(recipe.getAuthorId())) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "you're not authorized to delete this recipie");
+            jObject.put("message", "you're not authorized to delete this recipe");
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
-        recipieRepository.delete(recipie);
-        nutritionInformationRepository.delete(nutritionInformationRepository.findAllById(recipie.getId()));
+        recipeRepository.delete(recipe);
+        nutritionInformationRepository.delete(nutritionInformationRepository.findAllById(recipe.getId()));
         JSONObject jObject = new JSONObject();
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body(jObject.toString());
     }
 
-    //    //get Recipie information
-    @RequestMapping(value = "/v1/recipie/{id}", method = RequestMethod.GET)
+    //    //get Recipe information
+    @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.GET)
     public @ResponseBody
-    ResponseEntity<String> getRecipie(@PathVariable("id") String id) {
-        Recipie recipie = recipieRepository.findRecipieById(id);
-        if (recipie != null) {
-            JSONObject jObject = recipieParser(recipie);
+    ResponseEntity<String> getRecipe(@PathVariable("id") String id) {
+        Recipe recipe = recipeRepository.findRecipeById(id);
+        if (recipe != null) {
+            JSONObject jObject = recipeParser(recipe);
 
             return ResponseEntity.status(HttpStatus.OK).
                     body(jObject.toString());
         } else {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "Unable to get recipie info with id " + id);
+            jObject.put("message", "Unable to get recipe info with id " + id);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
@@ -502,22 +502,22 @@ public class RecipieController {
     }
 
     //
-    private JSONObject recipieParser(Recipie recipie) {
+    private JSONObject recipeParser(Recipe recipe) {
         JSONObject jObject = new JSONObject();
-        jObject.put("id", recipie.getId());
-        jObject.put("created_ts", recipie.getCreatedTs());
-        jObject.put("updated_ts", recipie.getUpdatedTs());
-        jObject.put("author_id", recipie.getAuthorId());
-        jObject.put("cook_time_in_min", recipie.getCookTimeInMin());
-        jObject.put("prep_time_in_min", recipie.getPrepTimeInMin());
-        jObject.put("total_time_in_min", recipie.getTotalTimeInMin());
-        jObject.put("title", recipie.getTitle());
-        jObject.put("cusine", recipie.getCusine());
-        jObject.put("servings", recipie.getServings());
-        jObject.put("ingredients", new JSONArray(recipie.getIngredients()));
+        jObject.put("id", recipe.getId());
+        jObject.put("created_ts", recipe.getCreatedTs());
+        jObject.put("updated_ts", recipe.getUpdatedTs());
+        jObject.put("author_id", recipe.getAuthorId());
+        jObject.put("cook_time_in_min", recipe.getCookTimeInMin());
+        jObject.put("prep_time_in_min", recipe.getPrepTimeInMin());
+        jObject.put("total_time_in_min", recipe.getTotalTimeInMin());
+        jObject.put("title", recipe.getTitle());
+        jObject.put("cusine", recipe.getCusine());
+        jObject.put("servings", recipe.getServings());
+        jObject.put("ingredients", new JSONArray(recipe.getIngredients()));
 
         JSONArray steps = new JSONArray();
-        for (OrderedList ol : recipieRepository.findRecipieById(recipie.getId()).getSteps()) {
+        for (OrderedList ol : recipeRepository.findRecipeById(recipe.getId()).getSteps()) {
             JSONObject orderedList = new JSONObject();
             orderedList.put("position", ol.getPosition());
             orderedList.put("items", ol.getItems());
@@ -526,7 +526,7 @@ public class RecipieController {
         jObject.put("steps", steps);
 
         JSONObject nuinfo = new JSONObject();
-        NutritionInformation n = nutritionInformationRepository.findAllById(recipie.getId());
+        NutritionInformation n = nutritionInformationRepository.findAllById(recipe.getId());
         nuinfo.put("calories", n.getCalories());
         nuinfo.put("cholesterol_in_mg", n.getCholesterolInMg());
         nuinfo.put("sodium_in_mg", n.getSodiumInMg());

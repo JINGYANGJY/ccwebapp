@@ -18,6 +18,7 @@ public class Image {
     @Column(name = "url")
     private String url;
 
+    @OneToOne
     @PrimaryKeyJoinColumn
     private Recipe recipe;
 

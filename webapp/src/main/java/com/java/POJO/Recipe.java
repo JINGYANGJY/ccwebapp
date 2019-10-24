@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name="recipie")
-public class Recipie {
+@Table(name="recipe")
+public class Recipe {
 
 
     @Id
@@ -38,10 +38,13 @@ public class Recipie {
     @Column(name="ingredient")
     private List<String> ingredients = new ArrayList<>();
 
-    @OneToMany(mappedBy = "recipie",fetch =FetchType.EAGER ,cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "recipe",fetch =FetchType.EAGER ,cascade = CascadeType.REMOVE)
     private List<OrderedList> steps = new ArrayList<>();
 
-    public Recipie() {
+    @OneToOne(cascade = CascadeType.ALL)
+    private Image image;
+
+    public Recipe() {
     }
 
     public String getId() {
@@ -140,4 +143,11 @@ public class Recipie {
         this.steps = steps;
     }
 
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
 }

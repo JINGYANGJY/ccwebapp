@@ -1,6 +1,6 @@
 package com.java;
 
-import com.java.Controller.RecipieController;
+import com.java.Controller.RecipeController;
 import com.java.Controller.UserController;
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class JavaApplicationTests {
     UserController userController = new UserController();;
-    RecipieController recipieController = new RecipieController();
+    RecipeController recipeController = new RecipeController();
     String password ="Yang!123";
     String nonStrongpassword="123";
 
@@ -38,23 +38,23 @@ public class JavaApplicationTests {
     }
 
     @Test
-    public void inputIntegerCheck() { Assert.assertTrue(recipieController.inputIntegerCheck("123"));}
+    public void inputIntegerCheck() { Assert.assertTrue(recipeController.inputIntegerCheck("123"));}
 
     @Test
     public void nonInputIntegerCheck() {
-        Assert.assertFalse(recipieController.inputIntegerCheck("abc"));
-        Assert.assertFalse(recipieController.inputIntegerCheck("12.89"));
+        Assert.assertFalse(recipeController.inputIntegerCheck("abc"));
+        Assert.assertFalse(recipeController.inputIntegerCheck("12.89"));
     }
 
     @Test
     public void inputFloatCheck() {
-        Assert.assertTrue(recipieController.inputFloatCheck("12"));
-        Assert.assertTrue(recipieController.inputFloatCheck("12.89"));
+        Assert.assertTrue(recipeController.inputFloatCheck("12"));
+        Assert.assertTrue(recipeController.inputFloatCheck("12.89"));
     }
 
     @Test
     public void nonInputFloatCheck() {
-        Assert.assertFalse(recipieController.inputFloatCheck("abc"));
+        Assert.assertFalse(recipeController.inputFloatCheck("abc"));
     }
 
 }

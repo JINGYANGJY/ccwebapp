@@ -16,23 +16,23 @@ public class OrderedList {
     private String items;
 
     @ManyToOne
-    private Recipie recipie;
+    private Recipe recipe;
 
 
-    public OrderedList(Recipie recipie) {
-        this.recipie = recipie;
+    public OrderedList(Recipe recipe) {
+        this.recipe = recipe;
     }
 
     public OrderedList(){
 
     }
 
-    public Recipie getRecipie() {
-        return recipie;
+    public Recipe getRecipe() {
+        return recipe;
     }
 
-    public void setRecipie(Recipie recipie) {
-        this.recipie = recipie;
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
     }
 
     public int getPosition() {

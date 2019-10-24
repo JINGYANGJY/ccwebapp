@@ -42,7 +42,7 @@ public class RecipeController {
     ImageRepository imageRepository;
 
     Regions clientRegion = Regions.US_EAST_1;
-    String bucketName = "web-test1";
+    String bucketName = "webapp.shujiefan.me";
     String profile = "dev";
 
     @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.PUT, consumes = "application/json")
@@ -636,7 +636,7 @@ public class RecipeController {
         }
         return null;
     }
-    
+
     public void deleteImage(Image image) {
         String[] temp = image.getUrl().split("/");
         String keyName = image.getId();

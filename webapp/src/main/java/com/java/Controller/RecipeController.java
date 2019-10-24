@@ -1,17 +1,19 @@
 package com.java.Controller;
 
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.java.DAO.NutritionInformationRepository;
-import com.java.DAO.OrderedListRepository;
-import com.java.DAO.RecipeRepository;
-import com.java.DAO.UserRepository;
-import com.java.POJO.NutritionInformation;
-import com.java.POJO.OrderedList;
-import com.java.POJO.Recipe;
-import com.java.POJO.User;
+import com.java.DAO.*;
+import com.java.POJO.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
@@ -36,7 +38,12 @@ public class RecipeController {
     NutritionInformationRepository nutritionInformationRepository;
     @Autowired
     OrderedListRepository orderedListRepository;
+    @Autowired
+    ImageRepository imageRepository;
 
+    Regions clientRegion = Regions.US_EAST_1;
+    String bucketName = "web-test1";
+    String profile = "dev";
 
     @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody
@@ -462,7 +469,7 @@ public class RecipeController {
         }
         if (recipe == null) {
             JSONObject jObject = new JSONObject();
-            jObject.put("message", "Recipe with id " + URI[4] + " does not exist");
+            jObject.put("message", "Recipe with id " + URI[3] + " does not exist");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
@@ -476,6 +483,9 @@ public class RecipeController {
         }
         recipeRepository.delete(recipe);
         nutritionInformationRepository.delete(nutritionInformationRepository.findAllById(recipe.getId()));
+        if (recipe.getImage() != null) {
+            deleteImage(recipe.getImage());
+        }
         JSONObject jObject = new JSONObject();
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
@@ -501,9 +511,42 @@ public class RecipeController {
         }
     }
 
+    // get the newest Recipe information
+    @RequestMapping(value = "/v1/recipes", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity<String> getNewestRecipe() {
+        Iterable<Recipe> recipeList = recipeRepository.findAll();
+        Iterator a = recipeList.iterator();
+        Recipe recipe = new Recipe();
+        while (a.hasNext()) {
+            Recipe r = (Recipe) a.next();
+            if (recipe.getCreatedTs() == null || r.getCreatedTs().compareTo(recipe.getCreatedTs()) > 0) {
+                recipe = r;
+            }
+        }
+        if (recipe == new Recipe()) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "No recipe available");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).
+                    body(jObject.toString());
+        }
+        JSONObject jObject = recipeParser(recipe);
+        return ResponseEntity.status(HttpStatus.OK).
+                body(jObject.toString());
+    }
+
     //
     private JSONObject recipeParser(Recipe recipe) {
         JSONObject jObject = new JSONObject();
+        JSONObject imageInfo = new JSONObject();
+        if (recipe.getImage() == null) {
+            imageInfo.put("id", "");
+            imageInfo.put("url", "");
+        } else {
+            imageInfo.put("id", recipe.getImage().getId());
+            imageInfo.put("url", recipe.getImage().getUrl());
+        }
+        jObject.put("image", imageInfo);
         jObject.put("id", recipe.getId());
         jObject.put("created_ts", recipe.getCreatedTs());
         jObject.put("updated_ts", recipe.getUpdatedTs());
@@ -592,5 +635,26 @@ public class RecipeController {
             }
         }
         return null;
+    }
+    
+    public void deleteImage(Image image) {
+        String[] temp = image.getUrl().split("/");
+        String keyName = image.getId();
+        try {
+            ProfileCredentialsProvider sys = new ProfileCredentialsProvider(profile);
+            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                    .withRegion(clientRegion).withCredentials(new AWSStaticCredentialsProvider(sys.getCredentials()))
+                    .build();
+
+            s3Client.deleteObject(new DeleteObjectRequest(bucketName, keyName));
+        } catch (AmazonServiceException e) {
+            // The call was transmitted successfully, but Amazon S3 couldn't process
+            // it, so it returned an error response.
+            e.printStackTrace();
+        } catch (SdkClientException e) {
+            // Amazon S3 couldn't be contacted for a response, or the client
+            // couldn't parse the response from Amazon S3.
+            e.printStackTrace();
+        }
     }
 }

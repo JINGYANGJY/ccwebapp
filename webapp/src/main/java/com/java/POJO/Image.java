@@ -8,20 +8,15 @@ import javax.persistence.*;
 @Entity
 @Table(name="image")
 public class Image {
-
     @Id
-    @GeneratedValue(generator = "generator")
-    @GenericGenerator(name = "generator", strategy = "foreign", parameters = @Parameter(name = "property", value = "recipe"))
-    @Column(name = "id", unique = true, nullable = false)
+    @Column(name = "id")
     private String id;
 
     @Column(name = "url")
     private String url;
 
-    @OneToOne
-    @PrimaryKeyJoinColumn
-    private Recipe recipe;
-
+    public Image() {
+    }
 
     public String getId() {
         return id;
@@ -37,13 +32,5 @@ public class Image {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public Recipe getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
     }
 }

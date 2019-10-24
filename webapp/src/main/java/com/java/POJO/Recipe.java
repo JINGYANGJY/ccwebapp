@@ -41,7 +41,7 @@ public class Recipe {
     @OneToMany(mappedBy = "recipe",fetch =FetchType.EAGER ,cascade = CascadeType.REMOVE)
     private List<OrderedList> steps = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy="recipe")
+    @OneToOne(cascade = CascadeType.ALL)
     private Image image;
 
     public Recipe() {

@@ -185,7 +185,6 @@ public class ImageController {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         recipe.setUpdatedTs(ft.format(dNow));
         recipeRepository.save(recipe);
-        // TODO: db not been deleted
         imageRepository.delete(image);
 
         JSONObject jObject = new JSONObject();

@@ -3,6 +3,8 @@ package com.java.Controller;
 import com.amazonaws.auth.*;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.util.IOUtils;
+import com.amazonaws.util.Md5Utils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.java.DAO.ImageRepository;
 import com.java.DAO.RecipeRepository;
@@ -10,6 +12,8 @@ import com.java.DAO.UserRepository;
 import com.java.POJO.Image;
 import com.java.POJO.Recipe;
 import com.java.POJO.User;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.hibernate.boot.Metadata;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +32,10 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -45,7 +51,7 @@ public class ImageController {
     ImageRepository imageRepository;
 
     Regions clientRegion = Regions.US_EAST_1;
-    String bucketName = "web-test1";
+    String bucketName = "webapp.shujiefan.me";
     String profile = "dev";
 
     @RequestMapping(value = "/v1/recipe/{id}/image", method = RequestMethod.POST, consumes = "multipart/form-data", produces = "application/json")
@@ -83,11 +89,18 @@ public class ImageController {
                     .body(jObject.toString());
         }
 
+        if (recipe.getImage() != null) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "There is already an image associated with this recipe");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(jObject.toString());
+        }
+
         Image image = new Image();
         String imageId = UUID.randomUUID().toString();
         image.setId(imageId);
-        String url = uploadToS3(imageId, file);
-        image.setUrl(url);
+        image = uploadToS3(image, file);
         recipe.setImage(image);
         Date dNow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -95,7 +108,7 @@ public class ImageController {
         recipeRepository.save(recipe);
         JSONObject jObject = new JSONObject();
         jObject.put("id", image.getId());
-        jObject.put("url", url);
+        jObject.put("url", image.getUrl());
 
         return ResponseEntity.status(HttpStatus.CREATED).
                 body(jObject.toString());
@@ -180,8 +193,8 @@ public class ImageController {
                 body(jObject.toString());
     }
 
-    private String uploadToS3(String id, MultipartFile file) {
-        String fileObjKeyName = id;
+    private Image uploadToS3(Image image, MultipartFile file) {
+        String fileObjKeyName = image.getId();
 
         try {
             ProfileCredentialsProvider sys = new ProfileCredentialsProvider(profile);
@@ -192,16 +205,29 @@ public class ImageController {
             // Upload a file as a new object with ContentType and title specified.
             File convFile = new File(System.getProperty("java.io.tmpdir")+"/" + file.getOriginalFilename());
             file.transferTo(convFile);
-            convFile.deleteOnExit();
-            PutObjectRequest request = new PutObjectRequest(bucketName, fileObjKeyName, convFile);
             ObjectMetadata metadata = new ObjectMetadata();
+            FileInputStream fis = new FileInputStream(convFile);
+            byte[] content_bytes = IOUtils.toByteArray(fis);
+            String md5 = new String(org.apache.commons.codec.binary.Base64.encodeBase64(DigestUtils.md5(content_bytes)));
+
+            metadata.setContentMD5(md5);
             metadata.setContentType(file.getContentType());
-            metadata.addUserMetadata("x-amz-meta-title", "someTitle");
-            request.setMetadata(metadata);
+            metadata.setContentLength(convFile.length());
+            PutObjectRequest request = new PutObjectRequest(bucketName, fileObjKeyName, convFile).withMetadata(metadata);
             s3Client.putObject(request);
             String url = s3Client.getUrl(bucketName, fileObjKeyName).toString();
+
+            ObjectMetadata mdata = s3Client.getObjectMetadata(bucketName, fileObjKeyName);
+//            image.setMd5(mdata.getContentMD5());
+            image.setMd5(md5);
+            image.setLastModifiedTime(mdata.getLastModified().toString());
+            image.setContentLength(mdata.getContentLength());
+            image.seteTag(mdata.getETag());
+            image.setUrl(url);
+
+            convFile.deleteOnExit();
             convFile.delete();
-            return url;
+            return image;
         } catch (AmazonServiceException e) {
             // The call was transmitted successfully, but Amazon S3 couldn't process
             // it, so it returned an error response.

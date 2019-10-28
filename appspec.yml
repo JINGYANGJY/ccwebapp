@@ -3,10 +3,14 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ubuntu/www
+    destination: /home/ubuntu
 
-# hooks:
-#   AfterInstall:
-#    - location: ./afterInstall.sh
-#      timeout: 180
-#      runas: centos
+ hooks:
+   BeforeInstall:
+    - location: ./beforeInstall.sh
+      timeout: 180
+      runas: centos
+   AfterInstall:
+    - location: ./afterInstall.sh
+      timeout: 180
+      runas: centos

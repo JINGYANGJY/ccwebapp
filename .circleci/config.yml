@@ -13,12 +13,22 @@ jobs:
       - run:
           name: Install packages
           command: sudo apt-get update && sudo apt-get install -y python-pip
-      #- run:
-       #   name: Install awscli
-       #   command: sudo pip install awscli
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
       - run: 
           name: Build package
           command: pwd && ls -al && cd webapp && sudo apt install maven && mvn package
+      - run:
+          name: Build Deployment Artifact
+          command: mkdir codedeploy_artifact && zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip webapp/target/java-0.0.1-SNAPSHOT.jar infrastructure/aws/codedeploy/*.sh appspec.yml
+      - run:
+          name: Validate zip
+          command: cd codedeploy_artifact && pwd && ls -al
+     # - run:
+     #     name: Copy Artifact to S3
+     #     command: aws s3 sync ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET}
+
      # - run:
      #     name: Build zip
       #    command: |

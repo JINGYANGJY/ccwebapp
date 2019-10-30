@@ -2,15 +2,11 @@ version: 0.0
 os: linux
 
 files:
-  - source: /
-    destination: /home/ubuntu
+  - source: ./webapp/target/java-0.0.1-SNAPSHOT.jar
+    destination: /home/ubuntu/webapp
 
- hooks:
-   BeforeInstall:
-    - location: ./beforeInstall.sh
-      timeout: 180
-      runas: centos
-   AfterInstall:
-    - location: ./afterInstall.sh
-      timeout: 180
-      runas: centos
+hooks:
+  BeforeInstall:
+   - location: ./infrastructure/aws/codedeploy/before-install.sh
+     timeout: 300
+     runas: ubuntu

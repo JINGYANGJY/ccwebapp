@@ -1,4 +1,4 @@
 #!/bin/bash
 cd /home/ubuntu/
-rm -rf www
-mkdir www
+rm -rf webapp
+mkdir webapp

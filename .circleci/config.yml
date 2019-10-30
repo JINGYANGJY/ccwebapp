@@ -22,6 +22,8 @@ jobs:
             pwd \
             sudo apt install maven \
             mvn package \
+            ls -al \
+            cd webapp \
             ls -al
      # - run:
      #     name: Build zip

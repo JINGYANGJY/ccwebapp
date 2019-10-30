@@ -5,17 +5,17 @@ jobs:
     filter:
       branches:
         only:
-          - master
+          - Assignment7
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
       - checkout
       - run:
-          name: Install package
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y python-pip
-            sudo pip install awscli
+          name: Install packages
+          command: sudo apt-get update && sudo apt-get install wget zip unzip -y
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
      # - run:
      #     name: Build zip
       #    command: |

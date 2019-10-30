@@ -21,17 +21,24 @@ jobs:
           command: pwd && ls -al && cd webapp && sudo apt install maven && mvn package
       - run:
           name: Build Deployment Artifact
-          command: mkdir codedeploy_artifact && zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip webapp/target/java-0.0.1-SNAPSHOT.jar infrastructure/aws/codedeploy/*.sh appspec.yml && mv csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/ 
+          command: mkdir codedeploy_artifact && zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip webapp/target/java-0.0.1-SNAPSHOT.jar infrastructure/aws/codedeploy/*.sh appspec.yml && mv csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
       - run:
           name: Validate zip
-          command: cd codedeploy_artifact && pwd && ls -al && cd .. && pwd
+          command: cd codedeploy_artifact && pwd && ls -al
       - run:
           name: Copy Artifact to S3
           command: aws s3 sync ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET}
 
       - run:
           name: CODEDEPLOY API call
-          command: aws deploy create-deployment && application-name ${CODEDEPLOY_APPLICATION_NAME} && deployment-config-name CodeDeployDefault.AllAtOmce && deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME} && description "CSYE6225 - CodeDeploy" && s3-location bucket=${S3_CODEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip && region us-east-1 && output json
+          command: aws deploy create-deployment\
+              -- application-name ${CODEDEPLOY_APPLICATION_NAME}\
+              -- deployment-config-name CodeDeployDefault.AllAtOmce\
+              -- deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME}\
+              -- description "CSYE6225 - CodeDeploy"\
+              -- s3-location bucket=${S3_CODEDEPLOY_BUCKET},key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip,bundleType=zip\
+              -- region us-east-1
+              -- output json
              
          
             

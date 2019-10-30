@@ -31,7 +31,8 @@ jobs:
 
       - run:
           name: CODEDEPLOY API call
-          command: aws deploy create-deployment\
+          command: |
+            aws deploy create-deployment\
               -- application-name ${CODEDEPLOY_APPLICATION_NAME}\
               -- deployment-config-name CodeDeployDefault.AllAtOmce\
               -- deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME}\

@@ -12,7 +12,7 @@ jobs:
       - checkout
       - run:
           name: Install packages
-          command: sudo apt-get update && sudo apt-get install wget zip unzip -y
+          command: sudo apt-get update && sudo apt-get install -y python-pip
       - run:
           name: Install awscli
           command: sudo pip install awscli

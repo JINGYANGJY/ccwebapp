@@ -18,7 +18,7 @@ jobs:
        #   command: sudo pip install awscli
       - run: 
           name: Build package
-          command: pwd && ls -al 
+          command: pwd && ls -al && cd webapp && sudo apt install maven && mvn package
      # - run:
      #     name: Build zip
       #    command: |

@@ -1,6 +1,11 @@
 version: 2
 jobs:
   build:
+    working_directory: ~
+    filter:
+      branches:
+        only:
+          - master
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -11,7 +16,6 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y python-pip
             sudo pip install awscli
-            sudo apt install maven
      # - run:
      #     name: Build zip
       #    command: |

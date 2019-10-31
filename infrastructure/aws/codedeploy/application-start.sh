@@ -1,3 +1,2 @@
-#!/bin/bash
-sudo chmod +x java-0.0.1-SNAPSHOT.jar 
+#!/bin/bash 
 java -jar java-0.0.1-SNAPSHOT.jar

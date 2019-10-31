@@ -22,6 +22,6 @@ hooks:
   ApplicaitonStart:
    - location: ./infrastructure/aws/codedeploy/application-start.sh
      timeout: 300
-     runas: ubuntu
+     runas: root
 
 

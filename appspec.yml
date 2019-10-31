@@ -6,7 +6,7 @@ files:
     destination: /home/ubuntu/webapp
 
 permissions: 
-  - object: /home/ubuntu
+  - object: /home/ubuntu/webapp
     pattern: "*.jar"
     owner: ubuntu
     mode: 777

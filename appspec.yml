@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source: ./webapp/target/java-0.0.1-SNAPSHOT.jar
-    destination: /home/ubuntu
+    destination: /home/ubuntu/webapp
 
 permissions: 
   - object: /home/ubuntu

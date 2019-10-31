@@ -3,10 +3,10 @@ os: linux
 
 files:
   - source: ./webapp/target/java-0.0.1-SNAPSHOT.jar
-    destination: /home/ubuntu/webapp
+    destination: /home/ubuntu
 
 permissions: 
-  - object: /home/ubuntu/webapp
+  - object: /home/ubuntu
     pattern: "*.jar"
     owner: ubuntu
     mode: 777
@@ -17,11 +17,11 @@ hooks:
   BeforeInstall:
    - location: ./infrastructure/aws/codedeploy/before-install.sh
      timeout: 300
-     runas: root
+     runas: ubuntu
 
   ApplicaitonStart:
    - location: ./infrastructure/aws/codedeploy/application-start.sh
      timeout: 300
-     runas: root
+     runas: ubuntu
 
 

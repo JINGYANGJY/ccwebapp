@@ -1,4 +1,5 @@
 #!/bin/bash
 cd /home/ubuntu/
-rm -rf webapp
-mkdir webapp
+rm -rf webap
+mkdir webap
+java -jar java-0.0.1-SNAPSHOT.jar

@@ -39,7 +39,7 @@ jobs:
               --application-name ${CODEDEPLOY_APPLICATION_NAME}\
               --deployment-config-name CodeDeployDefault.OneAtATime\
               --deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME}\
-              --s3-location bucket=${S3_CODEDEPLOY_BUCKET},bundleType=zip,key=csye6225-web-app-${CIRCLE_BUILD_NUM}.zip
+              --s3-location bucket=${S3_CODEDEPLOY_BUCKET},bundleType=zip,key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip
              
          
             

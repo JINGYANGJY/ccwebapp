@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /home/ubuntu/
-rm -rf webapp
-mkdir webapp
+sudo cd /home/ubuntu/
+sudo rm -rf webapp
+sudo mkdir webapp

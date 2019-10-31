@@ -1,4 +1,4 @@
 #!/bin/bash
 cd /home/ubuntu/
-rm -rf webap
-mkdir webap
+rm -rf webapp
+mkdir webapp

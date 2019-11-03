@@ -11,9 +11,7 @@ hooks:
      timeout: 300
      runas: centos
 
-  ApplicaitonStart:
-   - location: /infrastructure/aws/codedeploy/application-start.sh
+  AfterInstall:
+   - location: /infrastructure/aws/codedeploy/after-install.sh
      timeout: 300
      runas: centos
-
-

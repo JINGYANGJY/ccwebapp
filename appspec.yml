@@ -8,5 +8,5 @@ files:
 hooks:
   AfterInstall:
    - location: ./infrastructure/aws/codedeploy/after-install.sh
-     timeout: 900
+     timeout: 300
      runas: ubuntu

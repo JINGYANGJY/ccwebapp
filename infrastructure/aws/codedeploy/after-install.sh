@@ -1,1 +1,1 @@
-nohup java -jar ~/java -jar java-0.0.1-SNAPSHOT.jar>~/spring.log 2>&1 &
+sudo java -jar java-0.0.1-SNAPSHOT.jar

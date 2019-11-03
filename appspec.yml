@@ -2,8 +2,9 @@ version: 0.0
 os: linux
 
 files:
-  - source: /webapp/target/java-0.0.1-SNAPSHOT.jar
+  - source: /
     destination: /home/ubuntu
+
 permissions:
   - objext: /home/ubuntu/java-0.0.1-SNAPSHOT.jar
     pattern: "*.jar"
@@ -12,12 +13,8 @@ permissions:
     type:
       - file
 hooks:
-  BeforeInstall:
-   - location: /infrastructure/aws/codedeploy/before-install.sh
-     timeout: 300
-     runas: centos
 
   AfterInstall:
    - location: /infrastructure/aws/codedeploy/after-install.sh
      timeout: 300
-     runas: centos
+     runas: ubuntu

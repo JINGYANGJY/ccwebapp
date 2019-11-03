@@ -6,7 +6,7 @@ files:
     destination: /home/ubuntu
 
 permissions:
-  - objext: /home/ubuntu/java-0.0.1-SNAPSHOT.jar
+  - object: /home/ubuntu/java-0.0.1-SNAPSHOT.jar
     pattern: "*.jar"
     owner: root
     mode: 777

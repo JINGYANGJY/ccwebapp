@@ -1,4 +1,5 @@
 #!/bin/bash
 cd /home/ubuntu/
-#sudo java -jar java-0.0.1-SNAPSHOT.jar
-mkdir webapp
+sudo mkdir webapp
+sudo java -jar java-0.0.1-SNAPSHOT.jar
+

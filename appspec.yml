@@ -9,7 +9,7 @@ hooks:
   BeforeInstall:
    - location: ./infrastructure/aws/codedeploy/before-install.sh
      timeout: 300
-     runas: root
+     runas: ubuntu
 
   ApplicaitonStart:
    - location: ./infrastructure/aws/codedeploy/application-start.sh

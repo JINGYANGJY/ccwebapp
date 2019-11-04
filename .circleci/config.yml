@@ -30,7 +30,7 @@ jobs:
           command: cd codedeploy_artifact && pwd && ls -al
       - run:
           name: Copy Artifact to S3
-          command: aws s3 sync codedeploy_artifact/codedeploy_artifact.zip s3://${S3_CODEDEPLOY_BUCKET}
+          command: aws s3 sync ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET}
 
       - run:
           name: CODEDEPLOY API call

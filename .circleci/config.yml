@@ -24,13 +24,13 @@ jobs:
           command: mkdir codedeploy_artifact && cp webapp/target/java-0.0.1-SNAPSHOT.jar codedeploy_artifact && cp infrastructure/aws/codedeploy/*.sh codedeploy_artifact && cp appspec.yml codedeploy_artifact
       - run:
           name: Build Deployment Artifact
-          command: zip -j codedeploy_artifact/csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/*.*
+          command: zip -j codedeploy_artifact/codedeploy_artifact.zip codedeploy_artifact/*.*
       - run:
           name: Validate zip
           command: cd codedeploy_artifact && pwd && ls -al
       - run:
           name: Copy Artifact to S3
-          command: aws s3 sync ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET}
+          command: aws s3 sync codedeploy_artifact/codedeploy_artifact.zip s3://${S3_CODEDEPLOY_BUCKET}
 
       - run:
           name: CODEDEPLOY API call
@@ -42,7 +42,7 @@ jobs:
               --application-name ${CODEDEPLOY_APPLICATION_NAME}\
               --deployment-config-name CodeDeployDefault.OneAtATime\
               --deployment-group-name ${CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME}\
-              --s3-location bucket=${S3_CODEDEPLOY_BUCKET},bundleType=zip,key=csye6225-webapp-${CIRCLE_BUILD_NUM}.zip
+              --s3-location bucket=${S3_CODEDEPLOY_BUCKET},bundleType=zip,key=codedeploy_artifact.zip
              
          
             

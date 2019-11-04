@@ -20,8 +20,11 @@ jobs:
           name: Build package
           command: pwd && ls -al && cd webapp && sudo apt install maven && mvn package
       - run:
+          name: Collect Artifact
+          command: mkdir codedeploy_artifact && cp webapp/target/java-0.0.1-SNAPSHOT.jar codedeploy_artifact && cp infrastructure/aws/codedeploy/*.sh codedeploy_artifact && cp appspec.yml codedeploy_artifact
+      - run:
           name: Build Deployment Artifact
-          command: mkdir codedeploy_artifact && zip -r csye6225-webapp-${CIRCLE_BUILD_NUM}.zip webapp/target/java-0.0.1-SNAPSHOT.jar infrastructure/aws/codedeploy/*.sh appspec.yml && mv csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
+          command: zip -j codedeploy_artifact/csye6225-webapp-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/*.*
       - run:
           name: Validate zip
           command: cd codedeploy_artifact && pwd && ls -al

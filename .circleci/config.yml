@@ -30,10 +30,10 @@ jobs:
           command: cd codedeploy_artifact && pwd && ls -al
       - run:
           name: Copy Artifact to S3
-          command: aws s3 sync ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET}
+          command: aws s3 sync codedeploy_artifact/csye6225-webapp-${CIRCLE_BUILD_NUM}.zip s3://${S3_CODEDEPLOY_BUCKET}
 
       - run:
-          name: CODEDEPLOY API call
+          name: CODEDEPLOY API callcsye6225-webapp-${CIRCLE_BUILD_NUM}.zip
           command: |
             echo "Hello CodeDeploy"
             aws deploy create-deployment\

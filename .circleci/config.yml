@@ -30,7 +30,7 @@ jobs:
           command: cd codedeploy_artifact && pwd && ls -al
       - run:
           name: Copy Artifact to S3
-          command: aws s3 cp ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET} --recursive
+          command: aws s3 cp ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET} --sse aws:kms
 
       - run:
           name: CODEDEPLOY API call

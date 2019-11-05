@@ -26,11 +26,11 @@ jobs:
           name: Build Deployment Artifact
           command: zip -j codedeploy_artifact/codedeploy_artifact.zip codedeploy_artifact/*.*
       - run:
-          name: Validate zip
-          command: cd codedeploy_artifact && pwd && ls -al
+          name: Copy to Artifact
+          command: mkdir artifact && cp codedeploy_artifact/codedeploy_artifact.zip artifact
       - run:
           name: Copy Artifact to S3
-          command: aws s3 cp codedeploy_artifact.zip s3://${S3_CODEDEPLOY_BUCKET} --sse aws:kms --recursive
+          command: aws s3 cp ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET} --sse aws:kms --recursive
 
       - run:
           name: CODEDEPLOY API call

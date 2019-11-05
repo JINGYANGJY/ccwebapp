@@ -30,7 +30,7 @@ jobs:
           command: mkdir artifact && cp codedeploy_artifact/codedeploy_artifact.zip artifact
       - run:
           name: Copy Artifact to S3
-          command: aws s3 cp ./codedeploy_artifact s3://${S3_CODEDEPLOY_BUCKET} --sse aws:kms --recursive
+          command: aws s3 cp ./artifact s3://${S3_CODEDEPLOY_BUCKET} --sse aws:kms --recursive
 
       - run:
           name: CODEDEPLOY API call

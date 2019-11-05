@@ -42,8 +42,8 @@ public class RecipeController {
     ImageRepository imageRepository;
 
     Regions clientRegion = Regions.US_EAST_1;
-    String bucketName = "webapp.yayang.me";
-    String profile = "dev";
+    String bucketName = "webapp.prod.yayang.me";
+    String profile = "prod";
 
     @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody

@@ -51,8 +51,8 @@ public class ImageController {
     ImageRepository imageRepository;
 
     Regions clientRegion = Regions.US_EAST_1;
-    String bucketName = "webapp.yayang.me";
-    String profile = "dev";
+    String bucketName = "webapp.prod.yayang.me";
+    String profile = "prod";
 
     @RequestMapping(value = "/v1/recipe/{id}/image", method = RequestMethod.POST, consumes = "multipart/form-data", produces = "application/json")
     public @ResponseBody

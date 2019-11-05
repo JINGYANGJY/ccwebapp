@@ -21,7 +21,7 @@ jobs:
           command: pwd && ls -al && cd webapp && sudo apt install maven && mvn package
       - run:
           name: Collect Artifact
-          command: mkdir codedeploy_artifact && cp webapp/target/java-0.0.1-SNAPSHOT.jar codedeploy_artifact && cp infrastructure/aws/codedeploy/*.sh codedeploy_artifact && cp appspec.yml codedeploy_artifact
+          command: mkdir codedeploy_artifact && cp webapp/target/java-0.0.1-SNAPSHOT.jar codedeploy_artifact && cp infrastructure/aws/codedeploy/* codedeploy_artifact && cp appspec.yml codedeploy_artifact
       - run:
           name: Build Deployment Artifact
           command: zip -j codedeploy_artifact/codedeploy_artifact.zip codedeploy_artifact/*.*

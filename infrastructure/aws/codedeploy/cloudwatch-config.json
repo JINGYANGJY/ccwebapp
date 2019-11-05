@@ -3,7 +3,7 @@
         "metrics_collection_interval": 10,
         "logfile": "/var/logs/amazon-cloudwatch-agent.log",
         "region": "us-east-1",
-        "run_as_user": "centos"
+        "run_as_user": "ubuntu"
     },
     "logs": {
         "logs_collected": {

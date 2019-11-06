@@ -40,7 +40,10 @@ import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Logger;
+
 import static com.java.JavaApplication.statsDClient;
+import static com.java.JavaApplication.LOGGER;
 
 @Controller
 public class ImageController {

@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import static com.java.JavaApplication.statsDClient;
+import static com.java.JavaApplication.LOGGER;
 
 @RestController
 public class UserController {
@@ -28,6 +29,7 @@ public class UserController {
     createAccount(@RequestBody ObjectNode objectNode) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.user.http.post");
+        LOGGER.info("Create user");
 
         if (objectNode.get("first_name") == null || objectNode.get("last_name") == null ||
                 objectNode.get("email_address") == null || objectNode.get("password") == null) {

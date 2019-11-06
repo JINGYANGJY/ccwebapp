@@ -321,6 +321,17 @@ resource "aws_instance" "web" {
 
   depends_on = [aws_db_instance.DB_Instance]
 
+  user_data = <<-EOF
+  #! /bin/bash
+        echo export AWS_REGION=${var.AWS_REGION}>>/etc/profile
+        echo export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}>>/etc/profile
+        echo export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}>>/etc/profile
+        echo export S3_IMAGE_BUCKET_NAME=${aws_s3_bucket.bucket.bucket}>>/etc/profile
+        echo export DATABASE_HOSTNAME=${aws_db_instance.DB_Instance.endpoint}>>/etc/profile
+        echo export DATABASE_USERNAME="root">>/etc/profile
+        echo export DATABASE_PASSWORD="root12345">>/etc/profile
+  EOF
+
   tags = {
     Name       = "csye6225-ec2"
     Enironment = "${var.profile}"
@@ -473,11 +484,16 @@ resource "aws_iam_policy" "circleci-ec2-ami" {
 EOF
 }
 
-
 resource "aws_iam_policy_attachment" "attachpolicy-ec2role" {
   name       = "attachpolicy-ec2role"
   roles      = ["${aws_iam_role.CodeDeployEC2ServiceRole.name}"]
   policy_arn = "${aws_iam_policy.CodeDeploy-EC2-S3.arn}"
+}
+
+resource "aws_iam_policy_attachment" "attachCloudWatchPolicy-ec2role" {
+  name       = "attachCloudWatchPolicy-ec2role"
+  roles      = ["${aws_iam_role.CodeDeployEC2ServiceRole.name}"]
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
 resource "aws_iam_policy_attachment" "attachpolicy-codedeployRole" {

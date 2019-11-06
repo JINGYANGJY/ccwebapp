@@ -2,6 +2,7 @@ package com.java.Controller;
 
 import com.amazonaws.auth.*;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.util.IOUtils;
 import com.amazonaws.util.Md5Utils;
@@ -35,11 +36,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Logger;
+
+import static com.java.JavaApplication.statsDClient;
+import static com.java.JavaApplication.LOGGER;
 
 @Controller
 public class ImageController {
@@ -50,32 +54,43 @@ public class ImageController {
     @Autowired
     ImageRepository imageRepository;
 
-    Regions clientRegion = Regions.US_EAST_1;
-    String bucketName = "webapp.prod.yayang.me";
-    String profile = "prod";
+    public static Regions clientRegion = Regions.fromName(System.getenv("AWS_REGION"));
+    public static String bucketName = System.getenv("S3_IMAGE_BUCKET_NAME");
+    public static String awsAccessKeyId = System.getenv("AWS_ACCESS_KEY_ID");
+    public static String awsSecretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY");
 
     @RequestMapping(value = "/v1/recipe/{id}/image", method = RequestMethod.POST, consumes = "multipart/form-data", produces = "application/json")
     public @ResponseBody
     ResponseEntity<String>
     uploadImage(@RequestHeader(value = "Authorization") String auth, @RequestParam(value = "recipeImage", required = true) MultipartFile file, @PathVariable("id") String id) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.image.http.post");
+        LOGGER.info("image.post: Upload Image");
+
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
         String password = decodedString.split(":")[1];
+        long findUserStart = System.currentTimeMillis();
         User user = userRepository.findUserByEmail(email);
+        recordTime("endpoint.image.http.post.query.findUserByEmail", findUserStart);
         if (!Authentication(user, password)) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "email and password is not matching");
+            recordTime("endpoint.image.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
 
+        long findRecipeStart = System.currentTimeMillis();
         Recipe recipe = recipeRepository.findRecipeById(id);
+        recordTime("endpoint.image.http.post.query.findRecipeById", findRecipeStart);
 
         if (recipe == null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Recipe with id " + id + " does not exist");
+            recordTime("endpoint.image.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -84,6 +99,7 @@ public class ImageController {
         if (!file.getContentType().equals("image/png") &&  !file.getContentType().equals("image/jpg") && !file.getContentType().equals("image/jpeg")) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "File type not valid");
+            recordTime("endpoint.image.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -92,6 +108,7 @@ public class ImageController {
         if (recipe.getImage() != null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "There is already an image associated with this recipe");
+            recordTime("endpoint.image.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -100,16 +117,21 @@ public class ImageController {
         Image image = new Image();
         String imageId = UUID.randomUUID().toString();
         image.setId(imageId);
+        long s3Start = System.currentTimeMillis();
         image = uploadToS3(image, file);
+        recordTime("endpoint.image.http.post.s3.upload", s3Start);
         recipe.setImage(image);
         Date dNow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         recipe.setUpdatedTs(ft.format(dNow));
+        long saveRecipeStart = System.currentTimeMillis();
         recipeRepository.save(recipe);
+        recordTime("endpoint.image.http.post.query.save.recipe", saveRecipeStart);
         JSONObject jObject = new JSONObject();
         jObject.put("id", image.getId());
         jObject.put("url", image.getUrl());
 
+        recordTime("endpoint.image.http.post", startTime);
         return ResponseEntity.status(HttpStatus.CREATED).
                 body(jObject.toString());
     }
@@ -118,20 +140,30 @@ public class ImageController {
     public @ResponseBody
     ResponseEntity<String>
     getImage(@PathVariable("recipeId") String recipeId, @PathVariable("imageId") String imageId) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.image.http.get");
+        LOGGER.info("image.get: Get Image info");
+
+        long findRecipeStart = System.currentTimeMillis();
         Recipe recipe = recipeRepository.findRecipeById(recipeId);
+        recordTime("endpoint.image.http.get.query.findRecipeById", findRecipeStart);
 
         if (recipe == null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Recipe with id " + recipeId + " does not exist");
+            recordTime("endpoint.image.http.get", startTime);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
         }
 
+        long findImageStart = System.currentTimeMillis();
         Image image = imageRepository.findImageById(imageId);
+        recordTime("endpoint.image.http.get.query.findImageById", findImageStart);
         if (image == null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Image with id " + imageId + " does not exist");
+            recordTime("endpoint.image.http.get", startTime);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
@@ -141,6 +173,7 @@ public class ImageController {
         jObject.put("id", image.getId());
         jObject.put("url", image.getUrl());
 
+        recordTime("endpoint.image.http.get", startTime);
         return ResponseEntity.status(HttpStatus.OK).
                 body(jObject.toString());
     }
@@ -149,45 +182,65 @@ public class ImageController {
     public @ResponseBody
     ResponseEntity<String>
     deleteImage(@RequestHeader(value = "Authorization") String auth, @PathVariable("recipeId") String recipeId, @PathVariable("imageId") String imageId) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.image.http.delete");
+        LOGGER.info("image.delete: Delete Image");
+
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
         String password = decodedString.split(":")[1];
+        long findUserStart = System.currentTimeMillis();
         User user = userRepository.findUserByEmail(email);
+        recordTime("endpoint.image.http.delete.query.findUserByEmail", findUserStart);
         if (!Authentication(user, password)) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "email and password is not matching");
+            recordTime("endpoint.image.http.delete", startTime);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
 
+        long findRecipeStart = System.currentTimeMillis();
         Recipe recipe = recipeRepository.findRecipeById(recipeId);
+        recordTime("endpoint.image.http.delete.query.findRecipeById", findRecipeStart);
         if (recipe == null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Recipe with id " + recipeId + " does not exist");
+            recordTime("endpoint.image.http.delete", startTime);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
         }
 
+        long findImageStart = System.currentTimeMillis();
         Image image = imageRepository.findImageById(imageId);
+        recordTime("endpoint.image.http.delete.query.findImageById", findImageStart);
         if (image == null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Image with id " + imageId + " does not exist");
+            recordTime("endpoint.image.http.delete", startTime);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
         }
+        long s3Start = System.currentTimeMillis();
         deleteImage(image);
+        recordTime("endpoint.image.http.delete.s3.delete", s3Start);
         recipe.setImage(null);
         Date dNow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         recipe.setUpdatedTs(ft.format(dNow));
+        long saveRecipeStart = System.currentTimeMillis();
         recipeRepository.save(recipe);
+        recordTime("endpoint.image.http.delete.query.save.recipe", saveRecipeStart);
+        long deleteImageStart = System.currentTimeMillis();
         imageRepository.delete(image);
+        recordTime("endpoint.image.http.delete.query.delete.image", deleteImageStart);
 
         JSONObject jObject = new JSONObject();
+        recordTime("endpoint.image.http.delete", startTime);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).
                 body(jObject.toString());
     }
@@ -196,9 +249,9 @@ public class ImageController {
         String fileObjKeyName = image.getId();
 
         try {
-            ProfileCredentialsProvider sys = new ProfileCredentialsProvider(profile);
+            AWSCredentials creds = new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey);
             AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                    .withRegion(clientRegion).withCredentials(new AWSStaticCredentialsProvider(sys.getCredentials()))
+                    .withRegion(clientRegion).withCredentials(new AWSStaticCredentialsProvider(creds))
                     .build();
 
             // Upload a file as a new object with ContentType and title specified.
@@ -241,13 +294,13 @@ public class ImageController {
         return null;
     }
 
-    public void deleteImage(Image image) {
+    public static void deleteImage(Image image) {
         String[] temp = image.getUrl().split("/");
         String keyName = image.getId();
         try {
-            ProfileCredentialsProvider sys = new ProfileCredentialsProvider(profile);
+            AWSCredentials creds = new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey);
             AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                    .withRegion(clientRegion).withCredentials(new AWSStaticCredentialsProvider(sys.getCredentials()))
+                    .withRegion(clientRegion).withCredentials(new AWSStaticCredentialsProvider(creds))
                     .build();
 
             s3Client.deleteObject(new DeleteObjectRequest(bucketName, keyName));
@@ -270,5 +323,10 @@ public class ImageController {
         } else {
             return false;
         }
+    }
+
+    public void recordTime(String name, Long startTime) {
+        long endTime = System.currentTimeMillis();
+        statsDClient.recordExecutionTime(name, endTime - startTime);
     }
 }

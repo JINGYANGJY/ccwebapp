@@ -18,7 +18,7 @@ jobs:
           command: sudo pip install awscli
       - run: 
           name: Build package
-          command: pwd && ls -al && cd webapp && sudo apt install maven && mvn package
+          command: pwd && ls -al && cd webapp && sudo apt install maven && mvn package -Dmaven.test.skip=true
       - run:
           name: Collect Artifact
           command: mkdir codedeploy_artifact && cp webapp/target/java-0.0.1-SNAPSHOT.jar codedeploy_artifact && cp infrastructure/aws/codedeploy/* codedeploy_artifact && cp appspec.yml codedeploy_artifact

@@ -65,6 +65,7 @@ public class ImageController {
     uploadImage(@RequestHeader(value = "Authorization") String auth, @RequestParam(value = "recipeImage", required = true) MultipartFile file, @PathVariable("id") String id) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.image.http.post");
+        LOGGER.info("image.post: Upload Image");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
@@ -141,6 +142,7 @@ public class ImageController {
     getImage(@PathVariable("recipeId") String recipeId, @PathVariable("imageId") String imageId) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.image.http.get");
+        LOGGER.info("image.get: Get Image info");
 
         long findRecipeStart = System.currentTimeMillis();
         Recipe recipe = recipeRepository.findRecipeById(recipeId);
@@ -182,6 +184,7 @@ public class ImageController {
     deleteImage(@RequestHeader(value = "Authorization") String auth, @PathVariable("recipeId") String recipeId, @PathVariable("imageId") String imageId) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.image.http.delete");
+        LOGGER.info("image.delete: Delete Image");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import static com.java.JavaApplication.statsDClient;
+import static com.java.JavaApplication.LOGGER;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -39,6 +40,7 @@ public class RecipeController {
     updateRecipe(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode, @PathVariable("id") String id) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.recipe.http.put");
+        LOGGER.info("recipe.put: Update Recipe");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
@@ -269,6 +271,7 @@ public class RecipeController {
     ResponseEntity<String> createRecipe(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.recipe.http.post");
+        LOGGER.info("recipe.post: Create Recipe");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
@@ -492,6 +495,7 @@ public class RecipeController {
     ResponseEntity<String> deleteRecipe(@RequestHeader(value = "Authorization") String auth, HttpServletRequest request) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.recipe.http.delete");
+        LOGGER.info("recipe.delete: Delete Recipe");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
@@ -558,6 +562,7 @@ public class RecipeController {
     ResponseEntity<String> getRecipe(@PathVariable("id") String id) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.recipe.http.get");
+        LOGGER.info("recipe.get: Get Recipe Info");
 
         long findRecipeStart = System.currentTimeMillis();
         Recipe recipe = recipeRepository.findRecipeById(id);
@@ -584,6 +589,7 @@ public class RecipeController {
     ResponseEntity<String> getNewestRecipe() {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.recipe.newest.http.get");
+        LOGGER.info("recipe.get.newest: Get the most recent Recipe Info");
 
         long findRecipeStart = System.currentTimeMillis();
         Iterable<Recipe> recipeList = recipeRepository.findAll();

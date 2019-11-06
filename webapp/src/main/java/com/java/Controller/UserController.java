@@ -29,7 +29,7 @@ public class UserController {
     createAccount(@RequestBody ObjectNode objectNode) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.user.http.post");
-        LOGGER.info("Create user");
+        LOGGER.info("user.post: Create user");
 
         if (objectNode.get("first_name") == null || objectNode.get("last_name") == null ||
                 objectNode.get("email_address") == null || objectNode.get("password") == null) {
@@ -114,6 +114,7 @@ public class UserController {
     ResponseEntity<String> getUserInfo(@RequestHeader(value = "Authorization") String auth) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.user.http.get");
+        LOGGER.info("user.get: Get user info");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
@@ -153,6 +154,7 @@ public class UserController {
     updateUserInfo(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode) {
         long startTime = System.currentTimeMillis();
         statsDClient.incrementCounter("endpoint.user.http.put");
+        LOGGER.info("user.put: Update user info");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);

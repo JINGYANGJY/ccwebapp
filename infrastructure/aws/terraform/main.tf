@@ -40,4 +40,7 @@ module "application" {
     sb3_id = module.network.sb3_id
     awscodedeployrole=var.awscodedeployrole
     circleciName=var.circleciName
+    AWS_ACCESS_KEY_ID=var.AWS_ACCESS_KEY_ID
+    AWS_REGION=var.AWS_REGION
+    AWS_SECRET_ACCESS_KEY=var.AWS_SECRET_ACCESS_KEY
 }

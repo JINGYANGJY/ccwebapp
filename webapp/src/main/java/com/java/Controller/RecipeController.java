@@ -1,14 +1,5 @@
 package com.java.Controller;
 
-
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -22,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import static com.java.JavaApplication.statsDClient;
+import static com.java.JavaApplication.LOGGER;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -41,32 +34,40 @@ public class RecipeController {
     @Autowired
     ImageRepository imageRepository;
 
-    Regions clientRegion = Regions.US_EAST_1;
-    String bucketName = "webapp.shujiefan.me";
-    String profile = "dev";
-
     @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody
     ResponseEntity<String>
     updateRecipe(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode, @PathVariable("id") String id) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.recipe.http.put");
+        LOGGER.info("recipe.put: Update Recipe");
+
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
         String password = decodedString.split(":")[1];
+
+        long findQueryStart = System.currentTimeMillis();
         User user = userRepository.findUserByEmail(email);
+        recordTime("endpoint.recipe.http.put.query.findUserByEmail", findQueryStart);
+
         if (!Authentication(user, password)) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "email and password is not matching");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
         //find recipe which need to be updated
+        long findRecipeStart = System.currentTimeMillis();
         Recipe recipe_updated = recipeRepository.findRecipeById(id);
+        recordTime("endpoint.recipe.http.put.query.findRecipeById", findRecipeStart);
 
         if (recipe_updated == null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Recipe with id " + id + " does not exist");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
@@ -74,6 +75,7 @@ public class RecipeController {
         if (!user.getId().equals(recipe_updated.getAuthorId())) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "you're not authorized to update this recipe");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
@@ -82,6 +84,7 @@ public class RecipeController {
         if (missing_field != null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", missing_field + " is missing");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -93,6 +96,7 @@ public class RecipeController {
         if (!(isCookMatch && isPrepMatch && isServingsMatch)) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the format of cook time, prep time or servings is wrong, should be integer");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -103,6 +107,7 @@ public class RecipeController {
         if (cook_time % 5 != 0 || prep_time % 5 != 0) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "cook time and prep time should be multiple of 5");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -118,6 +123,7 @@ public class RecipeController {
         if (servings < 1 || servings > 5) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the value of servings has to be in the range of [1,5]");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -135,6 +141,7 @@ public class RecipeController {
         if (!str.isArray() || str.size() == 0) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the value of ingredients should be an array with length > 0");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -152,6 +159,7 @@ public class RecipeController {
             if (arrayNode.size() == 0) {
                 JSONObject jObject = new JSONObject();
                 jObject.put("message", "the steps should not be null");
+                recordTime("endpoint.recipe.http.put", startTime);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(jObject.toString());
@@ -164,6 +172,7 @@ public class RecipeController {
                 if (!isPositionMatch) {
                     JSONObject object = new JSONObject();
                     object.put("message", "the format of position is wrong, should be integer");
+                    recordTime("endpoint.recipe.http.put", startTime);
                     return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
                             .body(object.toString());
@@ -171,6 +180,7 @@ public class RecipeController {
                 if (position < 1) {
                     JSONObject jObject = new JSONObject();
                     jObject.put("message", "the value of position has to be larger than 1");
+                    recordTime("endpoint.recipe.http.put", startTime);
                     return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
                             .body(jObject.toString());
@@ -182,30 +192,37 @@ public class RecipeController {
             }
 
             for (OrderedList orderedLists1 : recipe_updated.getSteps()) {
+                long deleteQueryStart = System.currentTimeMillis();
                 orderedListRepository.delete(orderedLists1);
+                recordTime("endpoint.recipe.http.put.query.delete.orderList", deleteQueryStart);
             }
-
 
             recipe_updated.setSteps(new_orderedLists);
             for (OrderedList order : new_orderedLists) {
+                long saveOrderList = System.currentTimeMillis();
                 orderedListRepository.save(order);
+                recordTime("endpoint.recipe.http.put.query.save.orderList", saveOrderList);
             }
 
         } catch (Exception e) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the format of steps is wrong, should be array");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
         //NutritionInforamtion update
+        long findNutrition = System.currentTimeMillis();
         NutritionInformation nuInfo = nutritionInformationRepository.findAllById(id);
+        recordTime("endpoint.recipe.http.put.query.find.nutritionInformation", findNutrition);
         try {
             ObjectNode nutrition_information = objectNode.with("nutrition_information");
             String field = checkNutritionInput(nutrition_information);
             if (field != null) {
                 JSONObject jObject = new JSONObject();
                 jObject.put("message", field + " is missing");
+                recordTime("endpoint.recipe.http.put", startTime);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(jObject.toString());
@@ -220,6 +237,7 @@ public class RecipeController {
             if (!check) {
                 JSONObject jObject = new JSONObject();
                 jObject.put("message", "the format of nutrition information is wrong");
+                recordTime("endpoint.recipe.http.put", startTime);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(jObject.toString());
@@ -233,13 +251,17 @@ public class RecipeController {
         } catch (Exception e) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the format of nutrition information should be a pojo");
+            recordTime("endpoint.recipe.http.put", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
         nuInfo.setId(id);
+        long saveNu = System.currentTimeMillis();
         nutritionInformationRepository.save(nuInfo);
+        recordTime("endpoint.recipe.http.put.query.save.nutritionInformation", saveNu);
         JSONObject jObject = recipeParser(recipe_updated);
+        recordTime("endpoint.recipe.http.put", startTime);
         return ResponseEntity.status(HttpStatus.OK).
                 body(jObject.toString());
     }
@@ -247,15 +269,21 @@ public class RecipeController {
     @RequestMapping(value = "/v1/recipe/", method = RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
     ResponseEntity<String> createRecipe(@RequestHeader(value = "Authorization") String auth, @RequestBody ObjectNode objectNode) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.recipe.http.post");
+        LOGGER.info("recipe.post: Create Recipe");
 
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
         String password = decodedString.split(":")[1];
+        long findUserStart = System.currentTimeMillis();
         User user = userRepository.findUserByEmail(email);
+        recordTime("endpoint.recipe.http.post.query.findUserByEmail", findUserStart);
         if (!Authentication(user, password)) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "email and password is not matching");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
@@ -265,6 +293,7 @@ public class RecipeController {
         if (missing_field != null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", missing_field + " is missing");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -278,6 +307,7 @@ public class RecipeController {
         if (!(isCookMatch && isPrepMatch && isServingsMatch)) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the format of cook time, prep time or servings is wrong, should be integer");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -288,6 +318,7 @@ public class RecipeController {
         if (cook_time % 5 != 0 || prep_time % 5 != 0) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "cook time and prep time should be multiple of 5");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -304,6 +335,7 @@ public class RecipeController {
         if (servings < 1 || servings > 5) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the value of servings has to be in the range of [1,5]");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -321,6 +353,7 @@ public class RecipeController {
         if (!str.isArray() || str.size() == 0) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the value of ingredients should be an array with length > 0");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -344,6 +377,7 @@ public class RecipeController {
             if (arrayNode.size() == 0) {
                 JSONObject jObject = new JSONObject();
                 jObject.put("message", "the steps should not be null");
+                recordTime("endpoint.recipe.http.post", startTime);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(jObject.toString());
@@ -354,6 +388,7 @@ public class RecipeController {
                 if (!isPositionMatch) {
                     JSONObject jObject = new JSONObject();
                     jObject.put("message", "the format of position is wrong, should be integer");
+                    recordTime("endpoint.recipe.http.post", startTime);
                     return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
                             .body(jObject.toString());
@@ -362,6 +397,7 @@ public class RecipeController {
                 if (position < 1) {
                     JSONObject jObject = new JSONObject();
                     jObject.put("message", "the value of position has to be larger than 1");
+                    recordTime("endpoint.recipe.http.post", startTime);
                     return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
                             .body(jObject.toString());
@@ -374,6 +410,7 @@ public class RecipeController {
         } catch (Exception e) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "the format of steps is wrong, should be array");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
@@ -388,6 +425,7 @@ public class RecipeController {
             if (field != null) {
                 JSONObject jObject = new JSONObject();
                 jObject.put("message", field + " is missing");
+                recordTime("endpoint.recipe.http.post", startTime);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(jObject.toString());
@@ -402,6 +440,7 @@ public class RecipeController {
             if (!check) {
                 JSONObject jObject = new JSONObject();
                 jObject.put("message", "the format of nutrition information is wrong");
+                recordTime("endpoint.recipe.http.post", startTime);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(jObject.toString());
@@ -414,21 +453,29 @@ public class RecipeController {
         } catch (Exception e) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", e + "the format of nutrition information should be a pojo");
+            recordTime("endpoint.recipe.http.post", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
 
+        long saveRecipeStart = System.currentTimeMillis();
         recipeRepository.save(recipe);
+        recordTime("endpoint.recipe.http.post.query.save.recipe", saveRecipeStart);
         for (OrderedList order : orderedLists) {
+            long saveOrderList = System.currentTimeMillis();
             orderedListRepository.save(order);
+            recordTime("endpoint.recipe.http.post.query.save.orderedList", saveOrderList);
         }
         nutritionInformation.setId(recipe.getId());
+        long saveNutri = System.currentTimeMillis();
         nutritionInformationRepository.save(nutritionInformation);
+        recordTime("endpoint.recipe.http.post.query.save.nutritionInformation", saveNutri);
 
 
         JSONObject jObject = recipeParser(recipe);
 
+        recordTime("endpoint.recipe.http.post", startTime);
         return ResponseEntity.status(HttpStatus.CREATED).
                 body(jObject.toString());
     }
@@ -446,6 +493,10 @@ public class RecipeController {
     @RequestMapping(value = "/v1/recipe/*", method = RequestMethod.DELETE)
     public @ResponseBody
     ResponseEntity<String> deleteRecipe(@RequestHeader(value = "Authorization") String auth, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.recipe.http.delete");
+        LOGGER.info("recipe.delete: Delete Recipe");
+
         byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
         String decodedString = new String(decodedBytes);
         String email = decodedString.split(":")[0];
@@ -454,15 +505,21 @@ public class RecipeController {
         if (URI.length == 3) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "recipe id is required");
+            recordTime("endpoint.recipe.http.delete", startTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(jObject.toString());
         }
+        long findRecipeStart = System.currentTimeMillis();
         Recipe recipe = recipeRepository.findRecipeById(URI[3]);
+        recordTime("endpoint.recipe.http.delete.query.findRecipeById", findRecipeStart);
+        long findUserStart = System.currentTimeMillis();
         User user = userRepository.findUserByEmail(email);
+        recordTime("endpoint.recipe.http.delete.query.findUserByEmail", findUserStart);
         if (!Authentication(user, password)) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "email and password is not matching");
+            recordTime("endpoint.recipe.http.delete", startTime);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
@@ -470,6 +527,7 @@ public class RecipeController {
         if (recipe == null) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Recipe with id " + URI[3] + " does not exist");
+            recordTime("endpoint.recipe.http.delete", startTime);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
@@ -477,16 +535,22 @@ public class RecipeController {
         if (!user.getId().equals(recipe.getAuthorId())) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "you're not authorized to delete this recipe");
+            recordTime("endpoint.recipe.http.delete", startTime);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
+        long deleteRecipeStart = System.currentTimeMillis();
         recipeRepository.delete(recipe);
         nutritionInformationRepository.delete(nutritionInformationRepository.findAllById(recipe.getId()));
+        recordTime("endpoint.recipe.http.delete.query.delete.recipe", deleteRecipeStart);
         if (recipe.getImage() != null) {
-            deleteImage(recipe.getImage());
+            long s3Start = System.currentTimeMillis();
+            ImageController.deleteImage(recipe.getImage());
+            recordTime("endpoint.recipe.http.delete.s3.delete", s3Start);
         }
         JSONObject jObject = new JSONObject();
+        recordTime("endpoint.recipe.http.delete", startTime);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body(jObject.toString());
@@ -496,15 +560,23 @@ public class RecipeController {
     @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.GET)
     public @ResponseBody
     ResponseEntity<String> getRecipe(@PathVariable("id") String id) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.recipe.http.get");
+        LOGGER.info("recipe.get: Get Recipe Info");
+
+        long findRecipeStart = System.currentTimeMillis();
         Recipe recipe = recipeRepository.findRecipeById(id);
+        recordTime("endpoint.recipe.http.get.query.findRecipeById", findRecipeStart);
         if (recipe != null) {
             JSONObject jObject = recipeParser(recipe);
 
+            recordTime("endpoint.recipe.http.get", startTime);
             return ResponseEntity.status(HttpStatus.OK).
                     body(jObject.toString());
         } else {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "Unable to get recipe info with id " + id);
+            recordTime("endpoint.recipe.http.get", startTime);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jObject.toString());
@@ -515,7 +587,13 @@ public class RecipeController {
     @RequestMapping(value = "/v1/recipes", method = RequestMethod.GET)
     public @ResponseBody
     ResponseEntity<String> getNewestRecipe() {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.recipe.newest.http.get");
+        LOGGER.info("recipe.get.newest: Get the most recent Recipe Info");
+
+        long findRecipeStart = System.currentTimeMillis();
         Iterable<Recipe> recipeList = recipeRepository.findAll();
+        recordTime("endpoint.recipe.newest.http.get.query.findAll", findRecipeStart);
         Iterator a = recipeList.iterator();
         Recipe recipe = new Recipe();
         while (a.hasNext()) {
@@ -527,10 +605,12 @@ public class RecipeController {
         if (recipe == new Recipe()) {
             JSONObject jObject = new JSONObject();
             jObject.put("message", "No recipe available");
+            recordTime("endpoint.recipe.newest.http.get", startTime);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).
                     body(jObject.toString());
         }
         JSONObject jObject = recipeParser(recipe);
+        recordTime("endpoint.recipe.newest.http.get", startTime);
         return ResponseEntity.status(HttpStatus.OK).
                 body(jObject.toString());
     }
@@ -637,24 +717,8 @@ public class RecipeController {
         return null;
     }
 
-    public void deleteImage(Image image) {
-        String[] temp = image.getUrl().split("/");
-        String keyName = image.getId();
-        try {
-            ProfileCredentialsProvider sys = new ProfileCredentialsProvider(profile);
-            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                    .withRegion(clientRegion).withCredentials(new AWSStaticCredentialsProvider(sys.getCredentials()))
-                    .build();
-
-            s3Client.deleteObject(new DeleteObjectRequest(bucketName, keyName));
-        } catch (AmazonServiceException e) {
-            // The call was transmitted successfully, but Amazon S3 couldn't process
-            // it, so it returned an error response.
-            e.printStackTrace();
-        } catch (SdkClientException e) {
-            // Amazon S3 couldn't be contacted for a response, or the client
-            // couldn't parse the response from Amazon S3.
-            e.printStackTrace();
-        }
+    public void recordTime(String name, Long startTime) {
+        long endTime = System.currentTimeMillis();
+        statsDClient.recordExecutionTime(name, endTime - startTime);
     }
 }

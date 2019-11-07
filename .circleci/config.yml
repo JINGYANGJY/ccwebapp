@@ -2,10 +2,6 @@ version: 2
 jobs:
   build:
     working_directory: ~/webapp
-    filter:
-      branches:
-        only:
-          - Assignment7
     docker:
       - image: circleci/openjdk:8-jdk
     steps:

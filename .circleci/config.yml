@@ -43,11 +43,9 @@ jobs:
           name: conditionally run a deploy job
           command: |
             # replace this with your build/deploy check (i.e. current branch is "release")
-            if [[ true ]]; then
-              curl --user ${CIRCLE_API_USER_TOKEN}: \
-                --data build_parameters[CIRCLE_JOB]=build \
-                https://circleci.com/api/v1.1/project/github/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tree/${CIRCLE_BRANCH}
-            fi
+            curl --user ${CIRCLE_API_USER_TOKEN}: \
+              --data build_parameters[CIRCLE_JOB]=build \
+              https://circleci.com/api/v1.1/project/github/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tree/${CIRCLE_BRANCH}
              
          
             

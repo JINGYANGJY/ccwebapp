@@ -584,7 +584,7 @@ public class RecipeController {
     }
 
     // get the newest Recipe information
-    @RequestMapping(value = "/v1/recipes", method = RequestMethod.GET)
+    @RequestMapping(value = "/v2/recipes", method = RequestMethod.GET)
     public @ResponseBody
     ResponseEntity<String> getNewestRecipe() {
         long startTime = System.currentTimeMillis();

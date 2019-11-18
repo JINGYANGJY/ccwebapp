@@ -1,13 +1,5 @@
 package com.java.Controller;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
-import com.amazonaws.services.simpleemail.model.*;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.CreateTopicRequest;
-import com.amazonaws.services.sns.model.CreateTopicResult;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -45,9 +37,7 @@ public class RecipeController {
 
     public static String domainName = System.getenv("DOMAIN_NAME");
     public static String port = System.getenv("SERVER_PORT");
-    public static String FROM = System.getenv("FROM");
-    public static boolean sentEmailBefore = false;
-    public static long sentEmailTime = 0;
+    public static String topic = System.getenv("TOPIC_ARN");
 
     @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody
@@ -655,14 +645,6 @@ public class RecipeController {
                     .body(jObject.toString());
         }
 
-        if (sentEmailBefore && (startTime - sentEmailTime < 18000000)) {
-            JSONObject jObject = new JSONObject();
-            recordTime("endpoint.myrecipes.http.post", startTime);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(jObject.toString());
-        }
-
         long recipeQueryTime = System.currentTimeMillis();
         Iterable<Recipe> iter = recipeRepository.findAll();
         recordTime("endpoint.myrecipes.http.post.query.findRecipe", recipeQueryTime);
@@ -675,18 +657,18 @@ public class RecipeController {
             }
         }
 
-        String links = "Below are links to all your recipes:\n";
+        String links = "<h1>Below are links to all your recipes:</h1><br>";
         for (Recipe recipe : recipeList) {
-            String recipeLink = "https://" + domainName + "/" + port + "/v1/recipe/" + recipe.getId();
-            links += recipeLink + '\n';
+            String link = "https://" + domainName + ":" + port + "/v1/recipe/" + recipe.getId();
+            links += "<a href='" + link + "'>" + link + "</a><br>";
         }
         JSONObject msgObject = new JSONObject();
+        msgObject.put("subject", "Recipe Links for " + user.getFirstName() + " " + user.getLastName());
         msgObject.put("links", links);
         msgObject.put("recipient", user.getEmail());
 
-        PublishRequest publishRequest = new PublishRequest("email_request", msgObject.toString());
-        sentEmailTime = System.currentTimeMillis();
-        sentEmailBefore = true;
+//        PublishRequest publishRequest = new PublishRequest(topic, msgObject.toString());
+        PublishRequest publishRequest = new PublishRequest("arn:aws:sns:us-east-1:056786084405:test2", msgObject.toString());
 
         JSONObject jObject = new JSONObject();
         recordTime("endpoint.myrecipes.http.post", startTime);

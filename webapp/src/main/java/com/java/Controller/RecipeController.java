@@ -662,7 +662,7 @@ public class RecipeController {
 
         String links = "<h1>Below are links to all your recipes:</h1><br>";
         for (Recipe recipe : recipeList) {
-            String link = "https://" + domainName + ":" + port + "/v1/recipe/" + recipe.getId();
+            String link = "https://" + domainName + "/v1/recipe/" + recipe.getId();
             links += "<a href='" + link + "'>" + link + "</a><br>";
         }
         JSONObject msgObject = new JSONObject();
@@ -673,8 +673,7 @@ public class RecipeController {
         AmazonSNSClient snsClient = new AmazonSNSClient(new BasicAWSCredentials(ImageController.awsAccessKeyId, ImageController.awsSecretAccessKey));
         snsClient.setRegion(Region.getRegion(ImageController.clientRegion));
 
-//        PublishRequest publishRequest = new PublishRequest(topic, msgObject.toString());
-        PublishRequest publishRequest = new PublishRequest("arn:aws:sns:us-east-1:056786084405:test2", msgObject.toString());
+        PublishRequest publishRequest = new PublishRequest(topic, msgObject.toString());
         snsClient.publish(publishRequest);
         
         JSONObject jObject = new JSONObject();

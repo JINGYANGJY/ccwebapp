@@ -1,5 +1,8 @@
 package com.java.Controller;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -666,6 +669,9 @@ public class RecipeController {
         msgObject.put("subject", "Recipe Links for " + user.getFirstName() + " " + user.getLastName());
         msgObject.put("links", links);
         msgObject.put("recipient", user.getEmail());
+
+        AmazonSNSClient snsClient = new AmazonSNSClient(new BasicAWSCredentials(ImageController.awsAccessKeyId, ImageController.awsSecretAccessKey));
+        snsClient.setRegion(Region.getRegion(ImageController.clientRegion));
 
 //        PublishRequest publishRequest = new PublishRequest(topic, msgObject.toString());
         PublishRequest publishRequest = new PublishRequest("arn:aws:sns:us-east-1:056786084405:test2", msgObject.toString());

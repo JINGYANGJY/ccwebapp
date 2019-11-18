@@ -675,7 +675,8 @@ public class RecipeController {
 
 //        PublishRequest publishRequest = new PublishRequest(topic, msgObject.toString());
         PublishRequest publishRequest = new PublishRequest("arn:aws:sns:us-east-1:056786084405:test2", msgObject.toString());
-
+        snsClient.publish(publishRequest);
+        
         JSONObject jObject = new JSONObject();
         recordTime("endpoint.myrecipes.http.post", startTime);
         return ResponseEntity

@@ -440,7 +440,7 @@ resource "aws_lb_listener" "ALBListenerService" {
   load_balancer_arn = "${aws_lb.applicationLoadBanlancer.arn}"
   port              = "443"
   protocol          = "HTTPS"
-  certificate_arn   = "arn:aws:acm:us-east-1:056786084405:certificate/67586b35-10e7-42fa-b89e-4e30bb73df9e"
+  certificate_arn   = var.certificate_arn
   default_action {
     type             = "forward"
     target_group_arn = "${aws_lb_target_group.ALBtargetGroup.arn}"
@@ -512,7 +512,7 @@ resource "aws_autoscaling_group" "autoscalinggroup" {
   default_cooldown          = 60
   wait_for_capacity_timeout = 0
   launch_configuration      = "${aws_launch_configuration.asg-lanch-config.name}"
- # target_group_arns         = ["${aws_lb_target_group.ALBtargetGroup.arn}"]
+  target_group_arns         = ["${aws_lb_target_group.ALBtargetGroup.arn}"]
 
   tag {
     key                 = "Name"
@@ -654,6 +654,8 @@ resource "aws_lambda_function" "lambda_function" {
   filename      = "${data.archive_file.dummy.output_path}"
   function_name = "lambda_function"
   role          = "${aws_iam_role.lambda_role.arn}"
+  timeout       = 120
+  memory_size   = 600
   handler       = "LogEvent::handleRequest"
   timeout       = 120
   memory_size   = 600

@@ -51,6 +51,7 @@ module "application" {
     sb3_availability_zone= var.sb3_availability_zone
     awscodedeployrole=var.awscodedeployrole
     AWS_ACCESS_KEY_ID=var.AWS_ACCESS_KEY_ID
+    certificate_arn=var.certificate_arn
     AWS_REGION=var.AWS_REGION
     AWS_SECRET_ACCESS_KEY=var.AWS_SECRET_ACCESS_KEY
     circleciName = var.circleciName

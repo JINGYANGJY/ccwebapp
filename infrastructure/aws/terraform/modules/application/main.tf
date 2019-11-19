@@ -654,8 +654,6 @@ resource "aws_lambda_function" "lambda_function" {
   filename      = "${data.archive_file.dummy.output_path}"
   function_name = "lambda_function"
   role          = "${aws_iam_role.lambda_role.arn}"
-  timeout       = 120
-  memory_size   = 600
   handler       = "LogEvent::handleRequest"
   timeout       = 120
   memory_size   = 600

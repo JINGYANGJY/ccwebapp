@@ -428,7 +428,7 @@ resource "aws_lb" "applicationLoadBanlancer" {
   security_groups    = ["${aws_security_group.loadBalancer.id}"]
   subnets            = ["${var.sb1_id}", "${var.sb2_id}", "${var.sb3_id}"]
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags = {
     Name = "csye6225-loadbanlancer"
@@ -440,7 +440,7 @@ resource "aws_lb_listener" "ALBListenerService" {
   load_balancer_arn = "${aws_lb.applicationLoadBanlancer.arn}"
   port              = "443"
   protocol          = "HTTPS"
-  certificate_arn   = "arn:aws:acm:us-east-1:830774374340:certificate/e429b87b-d671-4783-ab81-7f6109dcfc0b"
+  certificate_arn   = var.certificate_arn
   default_action {
     type             = "forward"
     target_group_arn = "${aws_lb_target_group.ALBtargetGroup.arn}"
@@ -512,7 +512,7 @@ resource "aws_autoscaling_group" "autoscalinggroup" {
   default_cooldown          = 60
   wait_for_capacity_timeout = 0
   launch_configuration      = "${aws_launch_configuration.asg-lanch-config.name}"
- # target_group_arns         = ["${aws_lb_target_group.ALBtargetGroup.arn}"]
+  target_group_arns         = ["${aws_lb_target_group.ALBtargetGroup.arn}"]
 
   tag {
     key                 = "Name"
@@ -654,6 +654,8 @@ resource "aws_lambda_function" "lambda_function" {
   filename      = "${data.archive_file.dummy.output_path}"
   function_name = "lambda_function"
   role          = "${aws_iam_role.lambda_role.arn}"
+  timeout       = 120
+  memory_size   = 600
   handler       = "LogEvent::handleRequest"
   runtime = "java8"
 
@@ -666,6 +668,14 @@ resource "aws_lambda_function" "lambda_function" {
 
 resource "aws_sns_topic_subscription" "subscription" {
   topic_arn = "${aws_sns_topic.recipe_topic.arn}"
-  protocol  = "lambda"//landa subscription
+  protocol  = "lambda"
   endpoint  = "${aws_lambda_function.lambda_function.arn}"
+}
+
+resource "aws_lambda_permission" "lambda_permission" {
+  statement_id  = "AllowMyDemoAPIInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.lambda_function.function_name}"
+  principal     = "sns.amazonaws.com"
+  source_arn = "${aws_lambda_function.lambda_function.arn}"
 }

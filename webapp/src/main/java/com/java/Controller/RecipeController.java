@@ -1,5 +1,9 @@
 package com.java.Controller;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,6 +37,10 @@ public class RecipeController {
     OrderedListRepository orderedListRepository;
     @Autowired
     ImageRepository imageRepository;
+
+    public static String domainName = System.getenv("DOMAIN_NAME");
+    public static String port = System.getenv("SERVER_PORT");
+    public static String topic = System.getenv("TOPIC_ARN");
 
     @RequestMapping(value = "/v1/recipe/{id}", method = RequestMethod.PUT, consumes = "application/json")
     public @ResponseBody
@@ -613,6 +621,66 @@ public class RecipeController {
         recordTime("endpoint.recipe.newest.http.get", startTime);
         return ResponseEntity.status(HttpStatus.OK).
                 body(jObject.toString());
+    }
+
+    // get the all Recipe links
+    @RequestMapping(value = "/v1/myrecipes", method = RequestMethod.POST)
+    public @ResponseBody
+    ResponseEntity<String> getRecipeLinks(@RequestHeader(value = "Authorization") String auth) {
+        long startTime = System.currentTimeMillis();
+        statsDClient.incrementCounter("endpoint.myrecipes.http.post");
+        LOGGER.info("myrecipes: Get recipe links");
+
+        byte[] decodedBytes = Base64.getDecoder().decode(auth.split("Basic ")[1]);
+        String decodedString = new String(decodedBytes);
+        String email = decodedString.split(":")[0];
+        String password = decodedString.split(":")[1];
+
+        long findUserStart = System.currentTimeMillis();
+        User user = userRepository.findUserByEmail(email);
+        recordTime("endpoint.recipe.http.delete.query.findUserByEmail", findUserStart);
+        if (!Authentication(user, password)) {
+            JSONObject jObject = new JSONObject();
+            jObject.put("message", "email and password is not matching");
+            recordTime("endpoint.myrecipes.http.post", startTime);
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(jObject.toString());
+        }
+
+        long recipeQueryTime = System.currentTimeMillis();
+        Iterable<Recipe> iter = recipeRepository.findAll();
+        recordTime("endpoint.myrecipes.http.post.query.findRecipe", recipeQueryTime);
+        Iterator recipeIterator = iter.iterator();
+        List<Recipe> recipeList = new ArrayList<>();
+        while (recipeIterator.hasNext()) {
+            Recipe r = (Recipe) recipeIterator.next();
+            if (r.getAuthorId().equals(user.getId())) {
+                recipeList.add(r);
+            }
+        }
+
+        String links = "<h1>Below are links to all your recipes:</h1><br>";
+        for (Recipe recipe : recipeList) {
+            String link = "https://" + domainName + "/v1/recipe/" + recipe.getId();
+            links += "<a href='" + link + "'>" + link + "</a><br>";
+        }
+        JSONObject msgObject = new JSONObject();
+        msgObject.put("subject", "Recipe Links for " + user.getFirstName() + " " + user.getLastName());
+        msgObject.put("links", links);
+        msgObject.put("recipient", user.getEmail());
+
+        AmazonSNSClient snsClient = new AmazonSNSClient(new BasicAWSCredentials(ImageController.awsAccessKeyId, ImageController.awsSecretAccessKey));
+        snsClient.setRegion(Region.getRegion(ImageController.clientRegion));
+
+        PublishRequest publishRequest = new PublishRequest(topic, msgObject.toString());
+        snsClient.publish(publishRequest);
+        
+        JSONObject jObject = new JSONObject();
+        recordTime("endpoint.myrecipes.http.post", startTime);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(jObject.toString());
     }
 
     //

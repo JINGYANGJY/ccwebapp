@@ -657,6 +657,8 @@ resource "aws_lambda_function" "lambda_function" {
   timeout       = 120
   memory_size   = 600
   handler       = "LogEvent::handleRequest"
+  timeout       = 120
+  memory_size   = 600
   runtime = "java8"
 
   environment {
@@ -666,16 +668,16 @@ resource "aws_lambda_function" "lambda_function" {
   }
 }
 
+resource "aws_lambda_permission" "allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.lambda_function.function_name}"
+  principal     = "sns.amazonaws.com"
+  source_arn    = "${aws_sns_topic.recipe_topic.arn}"
+}
+
 resource "aws_sns_topic_subscription" "subscription" {
   topic_arn = "${aws_sns_topic.recipe_topic.arn}"
   protocol  = "lambda"
   endpoint  = "${aws_lambda_function.lambda_function.arn}"
-}
-
-resource "aws_lambda_permission" "lambda_permission" {
-  statement_id  = "AllowMyDemoAPIInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.lambda_function.function_name}"
-  principal     = "sns.amazonaws.com"
-  source_arn = "${aws_lambda_function.lambda_function.arn}"
 }

@@ -7,6 +7,7 @@ import com.java.POJO.User;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -220,6 +221,16 @@ public class UserController {
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(jObject.toString());
         }
+    }
+
+    @RequestMapping(value = "/")
+    public ResponseEntity<String> index() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Content-Type", "application/json");
+        String ans = "{\"message\":\"Welcome to our REST services\"}";
+        return ResponseEntity.ok()
+                .headers(responseHeaders)
+                .body(ans);
     }
 
     public boolean Authentication(User user, String password) {

@@ -129,3 +129,4 @@ out/
 *.tfvars
 *.zip
 *.lock.info
+*.lock

@@ -23,6 +23,6 @@
 
 
 ## Running Tests
-Run the CreateUserTest Junit file under Test folder.
+Run the CreateUserTest Junit file under Test folder and see the result.
 
 

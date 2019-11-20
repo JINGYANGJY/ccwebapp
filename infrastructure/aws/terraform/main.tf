@@ -4,6 +4,14 @@ provider "aws" {
 }
 
 
+//circleci module
+module "policies" {
+    source = "./modules/policies"
+    circleciName = var.circleciName
+    region = var.region
+    profile = var.profile
+}
+
 //network module
 module "network" {
     source = "./modules/network"
@@ -38,9 +46,14 @@ module "application" {
     sb1_id = module.network.sb1_id
     sb2_id = module.network.sb2_id
     sb3_id = module.network.sb3_id
+    sb1_availability_zone= var.sb1_availability_zone
+    sb2_availability_zone= var.sb2_availability_zone
+    sb3_availability_zone= var.sb3_availability_zone
     awscodedeployrole=var.awscodedeployrole
-    circleciName=var.circleciName
     AWS_ACCESS_KEY_ID=var.AWS_ACCESS_KEY_ID
+    certificate_arn=var.certificate_arn
     AWS_REGION=var.AWS_REGION
     AWS_SECRET_ACCESS_KEY=var.AWS_SECRET_ACCESS_KEY
+    circleciName = var.circleciName
+    zone_id = var.zone_id
 }

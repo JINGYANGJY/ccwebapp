@@ -703,3 +703,11 @@ resource "aws_route53_record" "www" {
     evaluate_target_health = true
   }
 }
+
+resource "aws_cloudformation_stack" "wafs" {
+    name = "wafs"
+    template_body = "${file("./owasp_10_base.yml")}"
+    parameters = {
+      LOADBALANCER = "${aws_lb.applicationLoadBanlancer.arn}"
+   }
+}

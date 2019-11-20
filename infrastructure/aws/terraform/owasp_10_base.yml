@@ -1228,3 +1228,4 @@ Resources:
 #     Value: !If [ isRegional, !Ref wafrAdminRemoteAddrIpSet, !Ref wafgAdminRemoteAddrIpSet ]
 #   wafIpBlacklist:
 #     Value: !If [ isRegional, !Ref wafrBlacklistIpSet, !Ref wafgBlacklistIpSet ]
+

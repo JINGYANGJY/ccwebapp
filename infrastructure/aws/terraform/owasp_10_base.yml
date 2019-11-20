@@ -62,19 +62,19 @@ Parameters:
   maxExpectedURISize:
     Type: Number
     Description: Maximum number of bytes allowed in the URI component of the HTTP request. Generally the maximum possible value is determined by the server operating system (maps to file system paths), the web server software, or other middleware components. Choose a value that accomodates the largest URI segment you use in practice in your web application.
-    Default: 512
+    Default: 51200
   maxExpectedQueryStringSize:
     Type: Number
     Description: Maximum number of bytes allowed in the query string component of the HTTP request. Normally the  of query string parameters following the "?" in a URL is much larger than the URI , but still bounded by the  of the parameters your web application uses and their values.
-    Default: 1024
+    Default: 102400
   maxExpectedBodySize:
     Type: Number
     Description: Maximum number of bytes allowed in the body of the request. If you do not plan to allow large uploads, set it to the largest payload value that makes sense for your web application. Accepting unnecessarily large values can cause performance issues, if large payloads are used as an attack vector against your web application.
-    Default: 4096
+    Default: 4096000
   maxExpectedCookieSize:
     Type: Number
     Description: Maximum number of bytes allowed in the cookie header. The maximum size should be less than 4096, the size is determined by the amount of information your web application stores in cookies. If you only pass a session token via cookies, set the size to no larger than the serialized size of the session token and cookie metadata.
-    Default: 4093
+    Default: 409300
   csrfExpectedHeader:
     Type: String
     Description: The custom HTTP request header, where the CSRF token value is expected to be encountered
@@ -82,7 +82,7 @@ Parameters:
   csrfExpectedSize:
     Type: Number
     Description: The size in bytes of the CSRF token value. For example if it's a canonically formatted UUIDv4 value the expected size would be 36 bytes/ASCII characters
-    Default: 36
+    Default: 360
 
 ## ::METADATA::
 ## CloudFormation parameter UI definitions
@@ -1108,10 +1108,10 @@ Resources:
             Type: !Ref ruleAction
           Priority: 70
           RuleId: !Ref wafrPHPInsecureRule
-        - Action:
-            Type: !Ref ruleAction
-          Priority: 80
-          RuleId: !Ref wafrCSRFRule
+        # - Action:
+        #     Type: !Ref ruleAction
+        #   Priority: 80
+        #   RuleId: !Ref wafrCSRFRule
         - Action:
             Type: !Ref ruleAction
           Priority: 90
@@ -1157,10 +1157,10 @@ Resources:
             Type: !Ref ruleAction
           Priority: 70
           RuleId: !Ref wafgPHPInsecureRule
-        - Action:
-            Type: !Ref ruleAction
-          Priority: 80
-          RuleId: !Ref wafgCSRFRule
+        # - Action:
+        #     Type: !Ref ruleAction
+        #   Priority: 80
+        #   RuleId: !Ref wafgCSRFRule
         - Action:
             Type: !Ref ruleAction
           Priority: 90
@@ -1169,62 +1169,62 @@ Resources:
             Type: !Ref ruleAction
           Priority: 100
           RuleId: !Ref wafgAdminAccessRule
+
   MyWebACLAssociation:
     Type: "AWS::WAFRegional::WebACLAssociation"
     Properties:
       ResourceArn: !Ref LOADBALANCER
       WebACLId: !Ref wafrOwaspACL
-
 ## ::OUTPUTS::
 ## Outputs useful in other templates
-Outputs:
-  wafWebACL:
-    Value: !If [ isRegional, !Ref wafrOwaspACL, !Ref wafgOwaspACL ]
-  wafWebACLMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'owaspacl']]
-  wafSQLiRule:
-    Value: !If [ isRegional, !Ref wafrSQLiRule, !Ref wafgSQLiRule ]
-  wafSQLiRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'mitigatesqli']]
-  wafAuthTokenRule:
-    Value: !If [ isRegional, !Ref wafrAuthTokenRule, !Ref wafgAuthTokenRule ]
-  wafAuthTokenRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'badauthtokens']]
-  wafXSSRule:
-    Value: !If [ isRegional, !Ref wafrXSSRule, !Ref wafgXSSRule ]
-  wafXSSRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'mitigatexss']]
-  wafPathsRule:
-    Value: !If [ isRegional, !Ref wafrPathsRule, !Ref wafgPathsRule ]
-  wafPathsRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'detectrfilfi']]
-  wafPHPMisconfigRule:
-    Value: !If [ isRegional, !Ref wafrPHPInsecureRule, !Ref wafgPHPInsecureRule ]
-  wafPHPMisconfigRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'detectphpinsecure']]
-  wafAdminAccessRule:
-    Value: !If [ isRegional, !Ref wafrAdminAccessRule, !Ref wafgAdminAccessRule ]
-  wafAdminAccessRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'detectadminaccess']]
-  wafCSRFRule:
-    Value: !If [ isRegional, !Ref wafrCSRFRule, !Ref wafgCSRFRule ]
-  wafCSRFRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'enforcecsrf']]
-  wafSSIRule:
-    Value: !If [ isRegional, !Ref wafrServerSideIncludeRule, !Ref wafgServerSideIncludeRule ]
-  wafSSIRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'detectssi']]
-  wafBlacklistIpRule:
-    Value: !If [ isRegional, !Ref wafrBlacklistIpRule, !Ref wafgBlacklistIpRule ]
-  wafBlacklistIpRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'blacklistedips']]
-  wafSizeRestrictionRule:
-    Value: !If [ isRegional, !Ref wafrSizeRestrictionRule, !Ref wafgSizeRestrictionRule ]
-  wafSizeRestrictionRuleMetric:
-    Value: !Join ['', [!Ref stackPrefix, 'restrictsizes']]
-  wafAuthTokenBlacklist:
-    Value: !If [ isRegional, !Ref wafrAuthTokenStringSet, !Ref wafgAuthTokenStringSet ]
-  wafAdminAccessWhitelist:
-    Value: !If [ isRegional, !Ref wafrAdminRemoteAddrIpSet, !Ref wafgAdminRemoteAddrIpSet ]
-  wafIpBlacklist:
-    Value: !If [ isRegional, !Ref wafrBlacklistIpSet, !Ref wafgBlacklistIpSet ]
+# Outputs:
+#   wafWebACL:
+#     Value: !If [ isRegional, !Ref wafrOwaspACL, !Ref wafgOwaspACL ]
+#   wafWebACLMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'owaspacl']]
+#   wafSQLiRule:
+#     Value: !If [ isRegional, !Ref wafrSQLiRule, !Ref wafgSQLiRule ]
+#   wafSQLiRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'mitigatesqli']]
+#   wafAuthTokenRule:
+#     Value: !If [ isRegional, !Ref wafrAuthTokenRule, !Ref wafgAuthTokenRule ]
+#   wafAuthTokenRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'badauthtokens']]
+#   wafXSSRule:
+#     Value: !If [ isRegional, !Ref wafrXSSRule, !Ref wafgXSSRule ]
+#   wafXSSRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'mitigatexss']]
+#   wafPathsRule:
+#     Value: !If [ isRegional, !Ref wafrPathsRule, !Ref wafgPathsRule ]
+#   wafPathsRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'detectrfilfi']]
+#   wafPHPMisconfigRule:
+#     Value: !If [ isRegional, !Ref wafrPHPInsecureRule, !Ref wafgPHPInsecureRule ]
+#   wafPHPMisconfigRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'detectphpinsecure']]
+#   wafAdminAccessRule:
+#     Value: !If [ isRegional, !Ref wafrAdminAccessRule, !Ref wafgAdminAccessRule ]
+#   wafAdminAccessRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'detectadminaccess']]
+#   # wafCSRFRule:
+#   #   Value: !If [ isRegional, !Ref wafrCSRFRule, !Ref wafgCSRFRule ]
+#   wafCSRFRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'enforcecsrf']]
+#   wafSSIRule:
+#     Value: !If [ isRegional, !Ref wafrServerSideIncludeRule, !Ref wafgServerSideIncludeRule ]
+#   wafSSIRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'detectssi']]
+#   wafBlacklistIpRule:
+#     Value: !If [ isRegional, !Ref wafrBlacklistIpRule, !Ref wafgBlacklistIpRule ]
+#   wafBlacklistIpRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'blacklistedips']]
+#   wafSizeRestrictionRule:
+#     Value: !If [ isRegional, !Ref wafrSizeRestrictionRule, !Ref wafgSizeRestrictionRule ]
+#   wafSizeRestrictionRuleMetric:
+#     Value: !Join ['', [!Ref stackPrefix, 'restrictsizes']]
+#   wafAuthTokenBlacklist:
+#     Value: !If [ isRegional, !Ref wafrAuthTokenStringSet, !Ref wafgAuthTokenStringSet ]
+#   wafAdminAccessWhitelist:
+#     Value: !If [ isRegional, !Ref wafrAdminRemoteAddrIpSet, !Ref wafgAdminRemoteAddrIpSet ]
+#   wafIpBlacklist:
+#     Value: !If [ isRegional, !Ref wafrBlacklistIpSet, !Ref wafgBlacklistIpSet ]

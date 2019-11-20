@@ -679,3 +679,11 @@ resource "aws_sns_topic_subscription" "subscription" {
   protocol  = "lambda"
   endpoint  = "${aws_lambda_function.lambda_function.arn}"
 }
+
+resource "aws_cloudformation_stack" "wafs" { 
+    name = "wafs" 
+    template_body = "${file("./owasp_10_base.yml")}" 
+    parameters = {
+      LOADBALANCER = "${aws_lb.applicationLoadBanlancer.arn}"
+   }
+}

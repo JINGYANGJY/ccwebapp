@@ -63,3 +63,7 @@ resource "aws_iam_user_policy_attachment" "attachpolicy-lambda1" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda"
 }
 
+resource "aws_iam_user_policy_attachment" "attachpolicy-lambda2" {
+  user       = var.circleciName
+  policy_arn = "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+}

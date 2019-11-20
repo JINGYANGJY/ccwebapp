@@ -1,5 +1,110 @@
 data "aws_caller_identity" "current" { }
 
+resource "aws_security_group" "applicationSP" {
+ vpc_id      = var.vpc_id
+ ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  	tags = {
+  		Name ="applicationSP"
+  	}
+}
+
+# security group for EC2 instances
+resource "aws_security_group" "loadBalancer" {
+  vpc_id      = var.vpc_id
+ 
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "application-loadBalancer"
+  }
+}
+
+resource "aws_security_group" "DBSecurity" {
+  name        = "DBSecurity"
+  vpc_id      = var.vpc_id
+
+   ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    security_groups=["${aws_security_group.applicationSP.id}"]
+  }
+
+   ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    security_groups=["${aws_security_group.applicationSP.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+  	Name ="DBSecurity"
+  }
+}
+
+resource "aws_db_instance" "DB_Instance" {
+  identifier           = "csye6225-fall2019"
+  allocated_storage    = 20
+  engine               = "mysql"
+  storage_type		   = "gp2"
+  engine_version       = "5.7"
+  instance_class       = "db.t2.micro"
+  multi_az             = false
+  name                 = "csye6225"
+  username             = "root"
+  password             = "root12345"
+  parameter_group_name = "default.mysql5.7" 
+  publicly_accessible  = false
+  db_subnet_group_name = "${aws_db_subnet_group.sbsubnets.name}"
+  vpc_security_group_ids=["${aws_security_group.DBSecurity.id}"]
+  skip_final_snapshot  = true
+}
+
 # s3 bucket encrypt key
 resource "aws_kms_key" "mykey" {
   description             = "This key is used to encrypt bucket objects"
@@ -111,24 +216,6 @@ resource "aws_s3_bucket_public_access_block" "codedeployAccess" {
   restrict_public_buckets =true
 }
 
-
-resource "aws_db_instance" "DB_Instance" {
-  identifier           = "csye6225-fall2019"
-  allocated_storage    = 20
-  engine               = "mysql"
-  engine_version       = "5.7"
-  instance_class       = "db.t2.medium"
-  multi_az             = false
-  name                 = "csye6225"
-  username             = "root"
-  password             = "root12345"
-  parameter_group_name = "default.mysql5.7" 
-  publicly_accessible  = true
-  db_subnet_group_name = "${aws_db_subnet_group.sbsubnets.name}"
-  vpc_security_group_ids=["${aws_security_group.DBSecurity.id}"]
-  skip_final_snapshot  = true
-}
-
 resource "aws_db_subnet_group" "sbsubnets" {
   name       = "dbsubnet"
   subnet_ids = ["${var.sb1_id}", "${var.sb2_id}", "${var.sb3_id}"]
@@ -136,20 +223,6 @@ resource "aws_db_subnet_group" "sbsubnets" {
   tags = {
     Name = "My DB subnet group"
   }
-}
-
-resource "aws_security_group" "DBSecurity" {
-  name        = "DBSecurity"
-  vpc_id      = var.vpc_id
-}
-
-resource "aws_security_group_rule" "DBSecurityRule" {
-  type = "ingress"
-  from_port   = 3306
-  to_port     = 3306
-  protocol    = "tcp"
-  source_security_group_id = "${aws_security_group.applicationSP.id}"
-  security_group_id = "${aws_security_group.DBSecurity.id}"
 }
 
 # DynamoDB Table
@@ -241,7 +314,7 @@ resource "aws_codedeploy_deployment_group" "codedeploygroup" {
   app_name              = "${aws_codedeploy_app.codedeployapp.name}"
   deployment_group_name = "csye6225-webapp-deployment"
   service_role_arn      = "${aws_iam_role.CodeDeployServiceRole.arn}"
-
+  autoscaling_groups    = ["${aws_autoscaling_group.autoscalinggroup.name}"]
   ec2_tag_set {
     ec2_tag_filter {
       key   = "Name"
@@ -325,7 +398,6 @@ resource "aws_iam_policy" "CircleCI-Upload-To-S3" {
 EOF
 }
 
-
 resource "aws_iam_user_policy_attachment" "circleci-policy-1" {
   user       = var.circleciName
   policy_arn = "${aws_iam_policy.CircleCI-Upload-To-S3.arn}"
@@ -381,51 +453,11 @@ resource "aws_iam_user_policy_attachment" "circleci-policy-2" {
   policy_arn = "${aws_iam_policy.CircleCI-Code-Deploy.arn}"
 }
 
-
-# security group for EC2 instances
-resource "aws_security_group" "loadBalancer" {
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "application-loadBalancer"
-  }
-}
-
-resource "aws_security_group_rule" "applicationSecurityRule" {
-  type = "ingress"
-  from_port   = 8080
-  to_port     = 8080
-  protocol    = "tcp"
-  source_security_group_id = "${aws_security_group.loadBalancer.id}"
-  security_group_id = "${aws_security_group.applicationSP.id}"
-}
-
 resource "aws_lb" "applicationLoadBanlancer" {
   name               = "applicationLoadBanlancer"
-  ip_address_type    = "ipv4"
+  internal 			 = false
   load_balancer_type = "application"
-  security_groups    = ["${aws_security_group.loadBalancer.id}"]
+  security_groups    = ["${aws_security_group.applicationSP.id}"]
   subnets            = ["${var.sb1_id}", "${var.sb2_id}", "${var.sb3_id}"]
 
   enable_deletion_protection = false
@@ -440,34 +472,17 @@ resource "aws_lb_listener" "ALBListenerService" {
   load_balancer_arn = "${aws_lb.applicationLoadBanlancer.arn}"
   port              = "443"
   protocol          = "HTTPS"
-  certificate_arn   = var.certificate_arn
+  certificate_arn   = "${var.certificate_arn}"
   default_action {
     type             = "forward"
     target_group_arn = "${aws_lb_target_group.ALBtargetGroup.arn}"
   }
 }
 
-# security group for EC2 instances
-resource "aws_security_group" "applicationSP" {
-  name        = "applicationSP"
-  vpc_id      = var.vpc_id
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "applicationSP"
-  }
-}
-
-
 resource "aws_launch_configuration" "asg-lanch-config" {
   name = "asg-lanch-config"
   image_id      = "${var.ami_id}"
-  instance_type = "t2.nano"
+  instance_type = "t2.micro"
   associate_public_ip_address= true
 
   # Our Security group to allow HTTP and SSH access
@@ -515,12 +530,7 @@ resource "aws_autoscaling_group" "autoscalinggroup" {
   min_size                  = 3
   desired_capacity          = 3
   default_cooldown          = 60
-  wait_for_capacity_timeout = 0
   launch_configuration      = "${aws_launch_configuration.asg-lanch-config.name}"
-  target_group_arns         = ["${aws_lb_target_group.ALBtargetGroup.arn}"]
-  health_check_grace_period = 300
-  health_check_type         ="EC2"
-  force_delete              = true
   tag {
     key                 = "Name"
     value               = "csye6225-ec2"
@@ -539,11 +549,10 @@ resource "aws_lb_target_group" "ALBtargetGroup" {
     port = 8080
     healthy_threshold = 2
     unhealthy_threshold = 10
-    timeout = 80
-    interval = 90
+    timeout = 5
+    interval = 60
   }
 }
-
 
 resource "aws_autoscaling_policy" "up" {
   name                   = "up"
@@ -560,7 +569,6 @@ resource "aws_autoscaling_policy" "down" {
   cooldown               = 60
   autoscaling_group_name = "${aws_autoscaling_group.autoscalinggroup.name}"
 }
-
 
 resource "aws_cloudwatch_metric_alarm" "CPUAlarmHigh" {
   alarm_name          = "CPUAlarmHigh"
@@ -604,7 +612,6 @@ resource "aws_sns_topic" "recipe_topic" {
 
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_role"
-
 
   assume_role_policy = <<EOF
 {
@@ -685,9 +692,21 @@ resource "aws_sns_topic_subscription" "subscription" {
   endpoint  = "${aws_lambda_function.lambda_function.arn}"
 }
 
-resource "aws_cloudformation_stack" "wafs" { 
-    name = "wafs" 
-    template_body = "${file("./owasp_10_base.yml")}" 
+resource "aws_route53_record" "www" {
+  zone_id = "${var.zone_id}"
+  name    = "${var.domain}"
+  type    = "A"
+
+  alias {
+    name                   = "${aws_lb.applicationLoadBanlancer.dns_name}"
+    zone_id                = "${aws_lb.applicationLoadBanlancer.zone_id}"
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_cloudformation_stack" "wafs" {
+    name = "wafs"
+    template_body = "${file("./owasp_10_base.yml")}"
     parameters = {
       LOADBALANCER = "${aws_lb.applicationLoadBanlancer.arn}"
    }

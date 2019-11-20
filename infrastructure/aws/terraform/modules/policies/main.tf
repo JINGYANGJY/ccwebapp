@@ -60,6 +60,10 @@ resource "aws_iam_user_policy_attachment" "circleci-policy-3" {
 
 resource "aws_iam_user_policy_attachment" "attachpolicy-lambda1" {
   user       = var.circleciName
-  policy_arn = "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda"
 }
 
+resource "aws_iam_user_policy_attachment" "attachpolicy-lambda2" {
+  user       = var.circleciName
+  policy_arn = "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+}

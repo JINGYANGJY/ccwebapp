@@ -58,3 +58,8 @@ resource "aws_iam_user_policy_attachment" "circleci-policy-3" {
   policy_arn = "${aws_iam_policy.circleci-ec2-ami.arn}"
 }
 
+resource "aws_iam_user_policy_attachment" "attachpolicy-lambda1" {
+  user       = var.circleciName
+  policy_arn = "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+}
+

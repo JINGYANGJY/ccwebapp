@@ -822,78 +822,78 @@ Resources:
 ## OWASP Top 10 A8
 ## CSRF token enforcement example
 ## Enforce the presence of CSRF token in request header
-  wafrCSRFMethodStringSet:
-    Type: AWS::WAFRegional::ByteMatchSet
-    Condition: isRegional
-    Properties:
-      Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-method']]
-      ByteMatchTuples:
-        - FieldToMatch:
-            Type: METHOD
-          PositionalConstraint: EXACTLY
-          TargetString: post
-          TextTransformation: LOWERCASE
-  wafgCSRFMethodStringSet:
-    Type: AWS::WAF::ByteMatchSet
-    Condition: isGlobal
-    Properties:
-      Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-method']]
-      ByteMatchTuples:
-        - FieldToMatch:
-            Type: METHOD
-          PositionalConstraint: EXACTLY
-          TargetString: post
-          TextTransformation: LOWERCASE
-  wafrCSRFTokenSizeConstraint:
-    Type: AWS::WAFRegional::SizeConstraintSet
-    Condition: isRegional
-    Properties:
-      Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-token']]
-      SizeConstraints:
-        - FieldToMatch:
-            Type: HEADER
-            Data: !Ref csrfExpectedHeader
-          TextTransformation: NONE
-          ComparisonOperator: EQ
-          Size: !Ref csrfExpectedSize
-  wafgCSRFTokenSizeConstraint:
-    Type: AWS::WAF::SizeConstraintSet
-    Condition: isGlobal
-    Properties:
-      Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-token']]
-      SizeConstraints:
-        - FieldToMatch:
-            Type: HEADER
-            Data: !Ref csrfExpectedHeader
-          TextTransformation: NONE
-          ComparisonOperator: EQ
-          Size: !Ref csrfExpectedSize
-  wafrCSRFRule:
-    Type: AWS::WAFRegional::Rule
-    Condition: isRegional
-    Properties:
-      MetricName: !Join ['', [!Ref stackPrefix, 'enforcecsrf']]
-      Name: !Join ['-', [!Ref stackPrefix, 'enforce-csrf']]
-      Predicates:
-        - Type: ByteMatch
-          Negated: false
-          DataId: !Ref wafrCSRFMethodStringSet
-        - Type: SizeConstraint
-          Negated: true
-          DataId: !Ref wafrCSRFTokenSizeConstraint
-  wafgCSRFRule:
-    Type: AWS::WAF::Rule
-    Condition: isGlobal
-    Properties:
-      MetricName: !Join ['', [!Ref stackPrefix, 'enforcecsrf']]
-      Name: !Join ['-', [!Ref stackPrefix, 'enforce-csrf']]
-      Predicates:
-        - Type: ByteMatch
-          Negated: false
-          DataId: !Ref wafgCSRFMethodStringSet
-        - Type: SizeConstraint
-          Negated: true
-          DataId: !Ref wafgCSRFTokenSizeConstraint
+  # wafrCSRFMethodStringSet:
+  #   Type: AWS::WAFRegional::ByteMatchSet
+  #   Condition: isRegional
+  #   Properties:
+  #     Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-method']]
+  #     ByteMatchTuples:
+  #       - FieldToMatch:
+  #           Type: METHOD
+  #         PositionalConstraint: EXACTLY
+  #         TargetString: post
+  #         TextTransformation: LOWERCASE
+  # wafgCSRFMethodStringSet:
+  #   Type: AWS::WAF::ByteMatchSet
+  #   Condition: isGlobal
+  #   Properties:
+  #     Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-method']]
+  #     ByteMatchTuples:
+  #       - FieldToMatch:
+  #           Type: METHOD
+  #         PositionalConstraint: EXACTLY
+  #         TargetString: post
+  #         TextTransformation: LOWERCASE
+  # wafrCSRFTokenSizeConstraint:
+  #   Type: AWS::WAFRegional::SizeConstraintSet
+  #   Condition: isRegional
+  #   Properties:
+  #     Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-token']]
+  #     SizeConstraints:
+  #       - FieldToMatch:
+  #           Type: HEADER
+  #           Data: !Ref csrfExpectedHeader
+  #         TextTransformation: NONE
+  #         ComparisonOperator: EQ
+  #         Size: !Ref csrfExpectedSize
+  # wafgCSRFTokenSizeConstraint:
+  #   Type: AWS::WAF::SizeConstraintSet
+  #   Condition: isGlobal
+  #   Properties:
+  #     Name: !Join ['-', [!Ref stackPrefix, 'match-csrf-token']]
+  #     SizeConstraints:
+  #       - FieldToMatch:
+  #           Type: HEADER
+  #           Data: !Ref csrfExpectedHeader
+  #         TextTransformation: NONE
+  #         ComparisonOperator: EQ
+  #         Size: !Ref csrfExpectedSize
+  # wafrCSRFRule:
+  #   Type: AWS::WAFRegional::Rule
+  #   Condition: isRegional
+  #   Properties:
+  #     MetricName: !Join ['', [!Ref stackPrefix, 'enforcecsrf']]
+  #     Name: !Join ['-', [!Ref stackPrefix, 'enforce-csrf']]
+  #     Predicates:
+  #       - Type: ByteMatch
+  #         Negated: false
+  #         DataId: !Ref wafrCSRFMethodStringSet
+  #       - Type: SizeConstraint
+  #         Negated: true
+  #         DataId: !Ref wafrCSRFTokenSizeConstraint
+  # wafgCSRFRule:
+  #   Type: AWS::WAF::Rule
+  #   Condition: isGlobal
+  #   Properties:
+  #     MetricName: !Join ['', [!Ref stackPrefix, 'enforcecsrf']]
+  #     Name: !Join ['-', [!Ref stackPrefix, 'enforce-csrf']]
+  #     Predicates:
+  #       - Type: ByteMatch
+  #         Negated: false
+  #         DataId: !Ref wafgCSRFMethodStringSet
+  #       - Type: SizeConstraint
+  #         Negated: true
+  #         DataId: !Ref wafgCSRFTokenSizeConstraint
 
 ## 9.
 ## OWASP Top 10 A9

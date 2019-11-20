@@ -467,7 +467,7 @@ resource "aws_security_group" "applicationSP" {
 resource "aws_launch_configuration" "asg-lanch-config" {
   name = "asg-lanch-config"
   image_id      = "${var.ami_id}"
-  instance_type = "t2.micro"
+  instance_type = "t2.nano"
   associate_public_ip_address= true
 
   # Our Security group to allow HTTP and SSH access
@@ -502,6 +502,11 @@ resource "aws_launch_configuration" "asg-lanch-config" {
   EOF
 }
 
+resource "aws_autoscaling_attachment" "attachment" {
+   autoscaling_group_name  =  "${aws_autoscaling_group.autoscalinggroup.id}"
+   alb_target_group_arn= "${aws_lb_target_group.ALBtargetGroup.arn}"
+}
+
 
 resource "aws_autoscaling_group" "autoscalinggroup" {
   vpc_zone_identifier       = ["${var.sb1_id}", "${var.sb2_id}", "${var.sb3_id}"]
@@ -513,7 +518,9 @@ resource "aws_autoscaling_group" "autoscalinggroup" {
   wait_for_capacity_timeout = 0
   launch_configuration      = "${aws_launch_configuration.asg-lanch-config.name}"
   target_group_arns         = ["${aws_lb_target_group.ALBtargetGroup.arn}"]
-
+  health_check_grace_period = 300
+  health_check_type         ="EC2"
+  force_delete              = true
   tag {
     key                 = "Name"
     value               = "csye6225-ec2"
@@ -523,18 +530,17 @@ resource "aws_autoscaling_group" "autoscalinggroup" {
 
 resource "aws_lb_target_group" "ALBtargetGroup" {
   name        = "ALBtargetGroup"
-  port        = 80
+  port        = 8080
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = var.vpc_id
   health_check {
-    path = "/health"
-    port = 80
-    healthy_threshold = 3
-    unhealthy_threshold = 5
-    timeout = 5
-    interval = 30
-    protocol = "HTTPS"
+    path = "/"
+    port = 8080
+    healthy_threshold = 2
+    unhealthy_threshold = 10
+    timeout = 80
+    interval = 90
   }
 }
 
@@ -621,7 +627,6 @@ resource "aws_iam_policy_attachment" "attachpolicy-lambda" {
   roles      = ["${aws_iam_role.lambda_role.name}"]
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
-
 
 resource "aws_iam_policy_attachment" "attachpolicy-lambda1" {
   name       = "attachpolicy-lambda"

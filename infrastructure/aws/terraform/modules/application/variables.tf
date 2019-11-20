@@ -55,3 +55,5 @@ variable "sb2_availability_zone" {}
 variable "sb3_availability_zone" {}
 
 variable "certificate_arn" {}
+
+variable "zone_id" {}

@@ -55,4 +55,5 @@ module "application" {
     AWS_REGION=var.AWS_REGION
     AWS_SECRET_ACCESS_KEY=var.AWS_SECRET_ACCESS_KEY
     circleciName = var.circleciName
+    zone_id = var.zone_id
 }

@@ -46,5 +46,9 @@ variable "AWS_ACCESS_KEY_ID"{
 variable "AWS_SECRET_ACCESS_KEY"{
 }
 
+variable "zone_id" {}
+
 variable "AWS_REGION"{
 }
+
+variable "certificate_arn"{}

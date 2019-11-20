@@ -36,9 +36,6 @@ variable "profile" {
 variable "awscodedeployrole"{
 }
 
-variable "circleciName"{
-}
-
 variable "AWS_ACCESS_KEY_ID"{
 }
 
@@ -47,3 +44,16 @@ variable "AWS_SECRET_ACCESS_KEY"{
 
 variable "AWS_REGION"{
 }
+
+variable "circleciName"{
+}
+
+variable "sb1_availability_zone" {}
+
+variable "sb2_availability_zone" {}
+
+variable "sb3_availability_zone" {}
+
+variable "certificate_arn" {}
+
+variable "zone_id" {}

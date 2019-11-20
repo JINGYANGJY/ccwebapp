@@ -127,3 +127,6 @@ out/
 
 *.gz
 *.tfvars
+*.zip
+*.lock.info
+*.lock
